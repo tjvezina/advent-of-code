@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFile, writeFile } from 'fs';
+import { existsSync, mkdirSync, writeFile, promises } from 'fs';
 import { getChallengePath, runChallenge, testChallenge } from './challenge-manager.js';
 import * as consoleUtil from './framework/console-util.js';
 
@@ -83,7 +83,7 @@ function parseDateArg(arg) {
   return { year: null, day: null };
 }
 
-function createChallenge(year) {
+async function createChallenge(year) {
   if (!isValidYear(year)) {
     console.error(`Invalid year, cannot create challenge for ${year}.`);
     return;
@@ -97,8 +97,10 @@ function createChallenge(year) {
 
   const path = getChallengePath(year, day);
 
+  const challengeTemplate = await promises.readFile('./challenge-template.txt', 'utf8');
+
   mkdirSync(path, { recursive: true });
-  writeFile(`${path}/challenge.js`, '', err => err && console.error('Failed to create challenge file:', err));
+  writeFile(`${path}/challenge.js`, challengeTemplate, err => err && console.error('Failed to create challenge file:', err));
   writeFile(`${path}/input.txt`, '', err => err && console.error('Failed to create input file:', err));
 
   console.log(`Created challenge ${year}/${String(day).padStart(2, '0')}`);

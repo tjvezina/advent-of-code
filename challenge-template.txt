@@ -1,0 +1,13 @@
+export default {
+  title: '',
+
+  part1ExpectedAnswer: null,
+  solvePart1() {
+    return [null, null];
+  },
+
+  part2ExpectedAnswer: null,
+  solvePart2() {
+    return [null, null];
+  }
+}

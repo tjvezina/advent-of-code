@@ -44,7 +44,7 @@ export async function runChallenge(year, day) {
   const challenge = await loadChallenge(year, day);
 
   consoleUtil.setForeground(consoleUtil.color.yellow);
-  console.log(` <<< Advent of Code ${year} Day ${day} >>> `);
+  console.log(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
   consoleUtil.resetColors();
 
   runPart(challenge, 1);

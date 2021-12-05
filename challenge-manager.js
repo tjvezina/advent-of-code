@@ -44,7 +44,7 @@ export async function runChallenge(year, day) {
   const challenge = await loadChallenge(year, day);
 
   consoleUtil.setForeground(consoleUtil.color.yellow);
-  console.log(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
+  consoleUtil.writeLine(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
   consoleUtil.resetColors();
 
   runPart(challenge, 1);
@@ -55,24 +55,24 @@ function runPart(challenge, part) {
   const results = execute(challenge, part);
 
   setStatusColor(results.status);
-  process.stdout.write(`[Part ${part}]`);
+  consoleUtil.write(`[Part ${part}]`);
   consoleUtil.resetColors();
-  process.stdout.write(' ');
+  consoleUtil.write(' ');
 
   writeBenchmark();
 
   consoleUtil.resetColors();
   const messageParts = (results.message ?? '').split('{0}');
   if (messageParts.length > 0) {
-    process.stdout.write(messageParts[0]);
+    consoleUtil.write(messageParts[0]);
   }
   consoleUtil.setForeground(consoleUtil.color.cyan);
-  process.stdout.write(results.givenAnswer ?? '');
+  consoleUtil.write(results.givenAnswer ?? '');
   consoleUtil.resetColors();
   if (messageParts.length > 1) {
-    process.stdout.write(messageParts[1]);
+    consoleUtil.write(messageParts[1]);
   }
-  console.log();
+  consoleUtil.writeLine();
 }
 
 export async function testChallenge(year, day) {
@@ -83,37 +83,34 @@ export async function testChallenge(year, day) {
 }
 
 function testPart(challenge, part) {
-  // Disable console output during test execution
-  const write = process.stdout.write;
-  process.stdout.write = function() {};
+  consoleUtil.disableStdout();
   const results = execute(challenge, part);
-  process.stdout.write = write;
+  consoleUtil.enableStdout();
 
   consoleUtil.setForeground(part === 1 ? consoleUtil.color.blue : consoleUtil.color.darkCyan);
-  process.stdout.write(`${String(challenge.day).padStart(2, '0')}-${part} `);
+  consoleUtil.write(`${String(challenge.day).padStart(2, '0')}-${part} `);
 
   setStatusColor(results.status);
   switch (results.status) {
     case resultStatus.development:
     case resultStatus.candidate:
-      process.stdout.write('WIP ');
+      consoleUtil.write('WIP ');
       break;
     case resultStatus.wrongAnswer:
     case resultStatus.exception:
-      process.stdout.write('FAIL');
+      consoleUtil.write('FAIL');
       break;
     case resultStatus.success:
-      process.stdout.write('PASS');
+      consoleUtil.write('PASS');
       break;
   }
   consoleUtil.resetColors();
-  process.stdout.write(' ');
+  consoleUtil.write(' ');
 
   writeBenchmark();
 
   consoleUtil.resetColors();
-  process.stdout.write(results.status == resultStatus.exception ? results.message : results.givenAnswer);
-  console.log();
+  consoleUtil.writeLine(results.status === resultStatus.exception ? results.message : results.givenAnswer ?? '');
 }
 
 function execute(challenge, part) {
@@ -163,7 +160,7 @@ function writeBenchmark() {
   else if (elapsed < 10.0)  consoleUtil.setForeground(consoleUtil.color.darkRed);
   else                      consoleUtil.setForeground(consoleUtil.color.red);
 
-  process.stdout.write(`(${elapsedStr}s) `);
+  consoleUtil.write(`(${elapsedStr}s) `);
 }
 
 function setStatusColor(status) {

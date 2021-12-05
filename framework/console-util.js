@@ -21,6 +21,14 @@ export const color = {
 const foregroundStack = [];
 const backgroundStack = [];
 
+const defaultWriteFunc = process.stdout.write;
+
+export function write(msg) { process.stdout.write(msg ?? ''); }
+export function writeLine(msg) { process.stdout.write((msg ?? '') + '\n'); }
+
+export function disableStdout() { process.stdout.write = function () {}; }
+export function enableStdout() { process.stdout.write = defaultWriteFunc; }
+
 export function setForeground(color) { process.stdout.write(`\u001b[${color}m`); }
 export function setBackground(color) { process.stdout.write(`\u001b[${color + 10}m`); }
 

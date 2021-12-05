@@ -19,22 +19,36 @@ switch (arg0) {
     break;
   case 'test':
     if (arg1 === 'all') {
-      testAllChallenges();
+      testChallenges(FIRST_YEAR, new Date().getFullYear());
     } else {
-      let { year, day } = parseDateArg(arg1);
-      if (year === null) year = getDefaultYear();
-      if (day === null) day = getMostRecentChallengeDay(year);
-      if (day === null) {
-        console.error(`No ${year} challenges found.`);
+      if (arg1 === undefined) {
+        const year = getDefaultYear();
+        const day = getMostRecentChallengeDay(year);
+        if (day === null) {
+          console.error(`No ${year} challenges found to test.`);
+        } else {
+          testChallenges(year, null, day);
+        }
       } else {
-        testChallenge(year, day);
+        let arg1Date = parseDateArg(arg1);
+        if (!arg1Date.isValid()) {
+          console.error('Invalid date, must be YYYY, DD, or YYYY/DD');
+        } else {
+          if (arg1Date.year === null) {
+            testChallenges(getDefaultYear(), null, arg1Date.day);
+          } else if (arg1Date.day === null) {
+            testChallenges(arg1Date.year);
+          } else {
+            testChallenge(arg1Date.year, arg1Date.day);
+          }
+        }
       }
     }
     break;
   default:
     const arg0Date = parseDateArg(arg0);
 
-    if (arg0 === undefined || (arg0Date.year !== null || arg0Date.day !== null)) {
+    if (arg0 === undefined || (arg0Date.isValid())) {
       const year = arg0Date.year ?? getDefaultYear();
       const day = arg0Date.day ?? getMostRecentChallengeDay(year);
       if (day === null) {
@@ -67,20 +81,21 @@ function getFirstMissingChallengeDay(year) {
 
 // Expected formats: YYYY, DD, YYYY/DD
 function parseDateArg(arg) {
+  const date = { year: null, day: null, isValid() { return this.year !== null || this.day !== null;} };
+
   const parts = arg?.split('/') ?? [''];
 
   if (parts.every(part => !isNaN(part))) {
     if (parts.length === 1) {
-      if (isValidYear(parts[0])) return { year: parts[0], day: null };
-      if (isValidDay(parts[0])) return { year: null, day: parts[0] };
-    }
-    
-    if (parts.length === 2 && isValidYear(parts[0]) && isValidDay(parts[1])) {
-      return { year: parts[0], day: parts[1] };
+      if (isValidYear(parts[0]))     date.year = parts[0];
+      else if (isValidDay(parts[0])) date.day = parts[0];
+    } else if (parts.length === 2 && isValidYear(parts[0]) && isValidDay(parts[1])) {
+      date.year = parts[0];
+      date.day = parts[1];
     }
   }
   
-  return { year: null, day: null };
+  return date;
 }
 
 async function createChallenge(year) {
@@ -103,12 +118,38 @@ async function createChallenge(year) {
   writeFile(`${path}/challenge.js`, challengeTemplate, err => err && console.error('Failed to create challenge file:', err));
   writeFile(`${path}/input.txt`, '', err => err && console.error('Failed to create input file:', err));
 
-  console.log(`Created challenge ${year}/${String(day).padStart(2, '0')}`);
+  consoleUtil.writeLine(`Created challenge ${year}/${String(day).padStart(2, '0')}`);
 }
 
-function testAllChallenges() {
-  console.error('Not yet implemented');
-  process.exit(1);
+function testChallenges(startYear, endYear = null, singleDay = null) {
+  let wasAnyTestRun = false;
+  for (let year = startYear; year <= (endYear ?? startYear); year++) {
+    let yearHeaderWasDrawn = false;
+    for (let day = singleDay ?? 1; day <= (singleDay ?? 25); day++) {
+      if (!existsSync(`${getChallengePath(year, day)}/challenge.js`)) {
+        continue;
+      }
+
+      if (!yearHeaderWasDrawn) {
+        consoleUtil.setForeground(consoleUtil.color.yellow);
+        consoleUtil.writeLine(`-- ${year} --`);
+        consoleUtil.resetColors();
+
+        yearHeaderWasDrawn = true;
+      }
+
+      wasAnyTestRun = true;
+      testChallenge(year, day);
+    }
+  }
+  
+  if (!wasAnyTestRun) {
+    if (singleDay !== null) {
+      console.error(`Challenge ${startYear}/${String(singleDay).padStart(2, '0')} does not exist.`)
+    } else {
+      console.error(`No challenges found in ${startYear}${endYear !== null ? `-${endYear}` : ''} to test.`);
+    }
+  }
 }
 
 consoleUtil.resetColors();

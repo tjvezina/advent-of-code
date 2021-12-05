@@ -1,11 +1,17 @@
 export default {
   title: '',
 
+  initInput(inputText) {
+    this.input = inputText;
+  },
+
+  // --- Part 1 --- //
   part1ExpectedAnswer: null,
   solvePart1() {
     return [null, null];
   },
 
+  // --- Part 2 --- //
   part2ExpectedAnswer: null,
   solvePart2() {
     return [null, null];

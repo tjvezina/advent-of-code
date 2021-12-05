@@ -16,28 +16,24 @@ export function getChallengePath(year, day) { return `./${year}/${String(day).pa
 
 async function loadChallenge(year, day) {
   const path = getChallengePath(year, day);
-  const challengePath = `${path}/challenge.js`;
 
+  const challengePath = `${path}/challenge.js`;
   if (!existsSync(challengePath)) {
     console.error(`Challenge ${year}/${String(day).padStart(2, '0')} does not exist.`);
     process.exit(1);
   }
 
-  const inputPath = `${getChallengePath(year, day)}/input.txt`;
+  const inputPath = `${path}/input.txt`;
   if (!existsSync(inputPath)) {
     console.error(`Input file for challenge ${year}/${String(day).padStart(2, '0')} does not exist.`);
     process.exit(1);
   }
 
-  const input = await promises.readFile(inputPath, 'utf8');
+  const challenge = { year, day, ...((await import(challengePath)).default) };
 
-  return {
-    year,
-    day,
-    input,
-    inputList: input.split('\n'),
-    ...((await import(challengePath)).default)
-  };
+  challenge.initInput(await promises.readFile(inputPath, 'utf8'));
+
+  return challenge;
 }
 
 export async function runChallenge(year, day) {

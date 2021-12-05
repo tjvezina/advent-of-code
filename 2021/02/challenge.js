@@ -2,7 +2,7 @@ export default {
   title: 'Dive!',
 
   initInput(inputText) {
-    this.input = inputText.split('\n');
+    this.input = inputText.split(/\r?\n/);
   },
 
   // --- Part 1 --- //

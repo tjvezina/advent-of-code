@@ -2,7 +2,7 @@ export default {
   title: 'Sonar Sweep',
 
   initInput(inputText) {
-    this.input = inputText.split('\n').map(Number);
+    this.input = inputText.split(/\r?\n/).map(Number);
   },
 
   // --- Part 1 --- //

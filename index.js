@@ -121,7 +121,7 @@ async function createChallenge(year) {
   consoleUtil.writeLine(`Created challenge ${year}/${String(day).padStart(2, '0')}`);
 }
 
-function testChallenges(startYear, endYear = null, singleDay = null) {
+async function testChallenges(startYear, endYear = null, singleDay = null) {
   let wasAnyTestRun = false;
   for (let year = startYear; year <= (endYear ?? startYear); year++) {
     let yearHeaderWasDrawn = false;
@@ -139,7 +139,7 @@ function testChallenges(startYear, endYear = null, singleDay = null) {
       }
 
       wasAnyTestRun = true;
-      testChallenge(year, day);
+      await testChallenge(year, day);
     }
   }
   

@@ -1,0 +1,183 @@
+import { existsSync, promises } from 'fs';
+import { Challenge } from './challenge.js';
+import { log, ConsoleColor } from './framework/console-util.js';
+
+const enum ResultStatus {
+  development, // No answer given; hasn't been started, or isn't complete yet
+  candidate,   // Answer given, expected answer unknown; to be submitted to AoC
+  wrongAnswer, // Given answer does not match expected
+  success,     // Given answer matches expected
+  exception,   // Unhandled exception during execution
+}
+
+interface Results {
+  status: ResultStatus,
+  message: string,
+  givenAnswer: any,
+}
+
+type Part = 1 | 2;
+
+let partStartTime: number | null = null;
+let partEndTime: number | null = null;
+
+export function getChallengePath(year: number, day: number): string { return `./${year}/${String(day).padStart(2, '0')}`; }
+
+async function loadChallenge(year: number, day: number): Promise<Challenge> {
+  const path = getChallengePath(year, day);
+
+  const challengePath = `${path}/challenge.js`;
+  if (!existsSync(challengePath)) {
+    console.error(`Challenge ${year}/${String(day).padStart(2, '0')} does not exist.`);
+    process.exit(1);
+  }
+
+  const inputPath = `${path}/input.txt`;
+  if (!existsSync(inputPath)) {
+    console.error(`Input file for challenge ${year}/${String(day).padStart(2, '0')} does not exist.`);
+    process.exit(1);
+  }
+
+  const challengeModule = await import(challengePath);
+  const challenge = { year, day, ...challengeModule.default } as Challenge;
+
+  const input = await promises.readFile(inputPath, 'utf8');
+  challenge.initInput(input);
+
+  return challenge;
+}
+
+export async function runChallenge(year: number, day: number): Promise<void> {
+  const challenge = await loadChallenge(year, day);
+
+  log.setForeground(ConsoleColor.Yellow);
+  log.writeLine(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
+  log.resetColors();
+
+  runPart(challenge, 1);
+  runPart(challenge, 2);
+}
+
+function runPart(challenge: Challenge, part: Part) {
+  const results = execute(challenge, part);
+
+  setStatusColor(results.status);
+  log.write(`[Part ${part}]`);
+  log.resetColors();
+  log.write(' ');
+
+  writeBenchmark();
+
+  log.resetColors();
+  const messageParts = (results.message ?? '').split('{0}');
+  if (messageParts.length > 0) {
+    log.write(messageParts[0]);
+  }
+  log.setForeground(ConsoleColor.Cyan);
+  log.write(results.givenAnswer ?? '');
+  log.resetColors();
+  if (messageParts.length > 1) {
+    log.write(messageParts[1]);
+  }
+  log.writeLine();
+}
+
+export async function testChallenge(year: number, day: number): Promise<void> {
+  const challenge = await loadChallenge(year, day);
+
+  testPart(challenge, 1);
+  testPart(challenge, 2);
+}
+
+function testPart(challenge: Challenge, part: Part) {
+  log.disableStdout();
+  const results = execute(challenge, part);
+  log.enableStdout();
+
+  log.setForeground(part === 1 ? ConsoleColor.Blue : ConsoleColor.DarkCyan);
+  log.write(`${String(challenge.day).padStart(2, '0')}-${part} `);
+
+  setStatusColor(results.status);
+  switch (results.status) {
+    case ResultStatus.development:
+    case ResultStatus.candidate:
+      log.write('WIP ');
+      break;
+    case ResultStatus.wrongAnswer:
+    case ResultStatus.exception:
+      log.write('FAIL');
+      break;
+    case ResultStatus.success:
+      log.write('PASS');
+      break;
+  }
+  log.resetColors();
+  log.write(' ');
+
+  writeBenchmark();
+
+  log.resetColors();
+  log.writeLine(results.status === ResultStatus.exception ? results.message : results.givenAnswer ?? '');
+}
+
+function execute(challenge: Challenge, part: Part): Results {
+  let results = {} as Results;
+
+  try {
+    partStartTime = process.uptime();
+    if (challenge.reset !== undefined) challenge.reset();
+    const [ message, answer ] = challenge[`solvePart${part}`]() ?? [ null, null ];
+    partEndTime = process.uptime();
+
+    results.message = message;
+    results.givenAnswer = answer;
+
+    const expected = challenge[`part${part}ExpectedAnswer`];
+    if (expected !== null) {
+      results.status = (results.givenAnswer === expected ? ResultStatus.success : ResultStatus.wrongAnswer);
+    } else if (results.givenAnswer !== null) {
+      results.status = ResultStatus.candidate;
+    } else {
+      results.status = ResultStatus.development;
+    }
+  } catch (err) {
+    results.status = ResultStatus.exception;
+    partStartTime = partEndTime = null;
+
+    results.message = `${err}`;
+  }
+
+  return results;
+}
+
+function writeBenchmark() {
+  if (!partStartTime || !partEndTime) return;
+
+  const elapsed = partEndTime - partStartTime;
+
+  let elapsedStr;
+  if      (elapsed < 10)   elapsedStr = elapsed.toFixed(3);
+  else if (elapsed < 100)  elapsedStr = elapsed.toFixed(2);
+  else if (elapsed < 1000) elapsedStr = elapsed.toFixed(1);
+  else                     elapsedStr = '>1000';
+
+  if      (elapsed <  0.25) log.setForeground(ConsoleColor.DarkGray);
+  else if (elapsed <  1.0)  log.setForeground(ConsoleColor.DarkGreen);
+  else if (elapsed <  5.0)  log.setForeground(ConsoleColor.DarkYellow);
+  else if (elapsed < 10.0)  log.setForeground(ConsoleColor.DarkRed);
+  else                      log.setForeground(ConsoleColor.Red);
+
+  log.write(`(${elapsedStr}s) `);
+}
+
+function setStatusColor(status: ResultStatus) {
+  switch (status) {
+    case ResultStatus.development:   log.setForeground(ConsoleColor.DarkGray);                 break;
+    case ResultStatus.candidate:     log.setForeground(ConsoleColor.Cyan);                     break;
+    case ResultStatus.wrongAnswer:   log.setForeground(ConsoleColor.Red);                      break;
+    case ResultStatus.success:       log.setForeground(ConsoleColor.Green);                    break;
+    case ResultStatus.exception:     log.setColors(ConsoleColor.Black, ConsoleColor.Red);      break;
+    default:
+      throw new Error(`Unknown result status: ${status}`);
+  }
+}

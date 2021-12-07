@@ -1,6 +1,11 @@
 import { existsSync, mkdirSync, writeFile, promises } from 'fs';
 import { getChallengePath, runChallenge, testChallenge } from './challenge-manager.js';
-import * as consoleUtil from './framework/console-util.js';
+import { ConsoleColor, log } from './framework/console-util.js';
+
+interface ChallengeDate {
+  year?: number;
+  day?: number;
+}
 
 // Set to a specific year while working on challenges from that year, or null for the current year
 const ACTIVE_YEAR = null;
@@ -11,10 +16,10 @@ const arg1 = process.argv[3];
 
 switch (arg0) {
   case 'create':
-    if (arg1 !== undefined && !isValidYear(arg1)) {
+    if (arg1 !== undefined && !isValidYear(Number(arg1))) {
       console.error('Invalid year, cannot create challenge for', arg1);
     } else {
-      createChallenge(arg1 ?? getDefaultYear());
+      createChallenge(arg1 !== undefined ? Number(arg1) : getDefaultYear());
     }
     break;
   case 'test':
@@ -24,23 +29,17 @@ switch (arg0) {
       if (arg1 === undefined) {
         const year = getDefaultYear();
         const day = getMostRecentChallengeDay(year);
-        if (day === null) {
-          console.error(`No ${year} challenges found to test.`);
+        if (day !== null) {
+          testChallenges(year, undefined, day);
         } else {
-          testChallenges(year, null, day);
+          console.error(`No ${year} challenges found to test.`);
         }
       } else {
         let arg1Date = parseDateArg(arg1);
-        if (!arg1Date.isValid()) {
-          console.error('Invalid date, must be YYYY, DD, or YYYY/DD');
+        if (arg1Date !== null) {
+          testChallenges(arg1Date.year ?? getDefaultYear(), undefined, arg1Date.day ?? undefined);
         } else {
-          if (arg1Date.year === null) {
-            testChallenges(getDefaultYear(), null, arg1Date.day);
-          } else if (arg1Date.day === null) {
-            testChallenges(arg1Date.year);
-          } else {
-            testChallenge(arg1Date.year, arg1Date.day);
-          }
+          console.error('Invalid date, must use the format YYYY, DD, or YYYY/DD');
         }
       }
     }
@@ -48,9 +47,9 @@ switch (arg0) {
   default:
     const arg0Date = parseDateArg(arg0);
 
-    if (arg0 === undefined || (arg0Date.isValid())) {
-      const year = arg0Date.year ?? getDefaultYear();
-      const day = arg0Date.day ?? getMostRecentChallengeDay(year);
+    if (arg0 === undefined || arg0Date !== null) {
+      const year = arg0Date?.year ?? getDefaultYear();
+      const day = arg0Date?.day ?? getMostRecentChallengeDay(year);
       if (day === null) {
         console.error(`No ${year} challenges found.`);
       } else {
@@ -62,43 +61,43 @@ switch (arg0) {
     break;
 }
 
-function getDefaultYear() { return ACTIVE_YEAR ?? new Date().getFullYear(); }
+function getDefaultYear(): number { return ACTIVE_YEAR ?? new Date().getFullYear(); }
 
-function isValidYear(year) { return !isNaN(year) && year >= FIRST_YEAR && year < 3000; }
-function isValidDay(day) { return !isNaN(day) && 1 <= day && day <= 25; }
+function isValidYear(year: number): boolean { return !isNaN(year) && year >= FIRST_YEAR && year < 3000; }
+function isValidDay(day: number): boolean { return !isNaN(day) && 1 <= day && day <= 25; }
 
-function getMostRecentChallengeDay(year) {
+function getMostRecentChallengeDay(year: number): number | null {
   let day = 25;
   while (day > 0 && !existsSync(getChallengePath(year, day))) day--;
   return (day === 0 ? null : day);
 }
 
-function getFirstMissingChallengeDay(year) {
+function getFirstMissingChallengeDay(year: number): number | null {
   let day = 1;
   while (day <= 25 && existsSync(getChallengePath(year, day))) day++;
   return (day === 26 ? null : day);
 }
 
 // Expected formats: YYYY, DD, YYYY/DD
-function parseDateArg(arg) {
-  const date = { year: null, day: null, isValid() { return this.year !== null || this.day !== null;} };
+function parseDateArg(arg: string): ChallengeDate | null {
+  const date = {} as ChallengeDate;
 
-  const parts = arg?.split('/') ?? [''];
+  const parts = (arg?.split('/') ?? ['']).map(Number);
 
   if (parts.every(part => !isNaN(part))) {
     if (parts.length === 1) {
-      if (isValidYear(parts[0]))     date.year = parts[0];
-      else if (isValidDay(parts[0])) date.day = parts[0];
-    } else if (parts.length === 2 && isValidYear(parts[0]) && isValidDay(parts[1])) {
-      date.year = parts[0];
-      date.day = parts[1];
+      if (isValidYear(parts[0])) return { year: parts[0] };
+      if (isValidDay(parts[0])) return { day: parts[0] };
+    }
+    if (parts.length === 2 && isValidYear(parts[0]) && isValidDay(parts[1])) {
+      return { year: parts[0], day: parts[1] };
     }
   }
   
-  return date;
+  return null;
 }
 
-async function createChallenge(year) {
+async function createChallenge(year: number): Promise<void> {
   if (!isValidYear(year)) {
     console.error(`Invalid year, cannot create challenge for ${year}.`);
     return;
@@ -118,10 +117,10 @@ async function createChallenge(year) {
   writeFile(`${path}/challenge.js`, challengeTemplate, err => err && console.error('Failed to create challenge file:', err));
   writeFile(`${path}/input.txt`, '', err => err && console.error('Failed to create input file:', err));
 
-  consoleUtil.writeLine(`Created challenge ${year}/${String(day).padStart(2, '0')}`);
+  log.writeLine(`Created challenge ${year}/${String(day).padStart(2, '0')}`);
 }
 
-async function testChallenges(startYear, endYear = null, singleDay = null) {
+async function testChallenges(startYear: number, endYear?: number, singleDay?: number): Promise<void> {
   let wasAnyTestRun = false;
   for (let year = startYear; year <= (endYear ?? startYear); year++) {
     let yearHeaderWasDrawn = false;
@@ -131,9 +130,9 @@ async function testChallenges(startYear, endYear = null, singleDay = null) {
       }
 
       if (!yearHeaderWasDrawn) {
-        consoleUtil.setForeground(consoleUtil.color.yellow);
-        consoleUtil.writeLine(`-- ${year} --`);
-        consoleUtil.resetColors();
+        log.setForeground(ConsoleColor.Yellow);
+        log.writeLine(`-- ${year} --`);
+        log.resetColors();
 
         yearHeaderWasDrawn = true;
       }
@@ -144,12 +143,12 @@ async function testChallenges(startYear, endYear = null, singleDay = null) {
   }
   
   if (!wasAnyTestRun) {
-    if (singleDay !== null) {
+    if (singleDay !== undefined) {
       console.error(`Challenge ${startYear}/${String(singleDay).padStart(2, '0')} does not exist.`)
     } else {
-      console.error(`No challenges found in ${startYear}${endYear !== null ? `-${endYear}` : ''} to test.`);
+      console.error(`No challenges found in ${startYear}${endYear !== undefined ? `-${endYear}` : ''} to test.`);
     }
   }
 }
 
-consoleUtil.resetColors();
+log.resetColors();

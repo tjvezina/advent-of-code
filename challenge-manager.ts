@@ -38,13 +38,10 @@ async function loadChallenge(year: number, day: number): Promise<Challenge> {
     process.exit(1);
   }
 
-  const challengeModule = await import(challengePath);
-  const challenge = { year, day, ...challengeModule.default } as Challenge;
-
+  const { challenge } = await import(challengePath);
   const input = await promises.readFile(inputPath, 'utf8');
-  challenge.initInput(input);
 
-  return challenge;
+  return { year, day, input, ...challenge };
 }
 
 export async function runChallenge(year: number, day: number): Promise<void> {
@@ -125,8 +122,9 @@ function execute(challenge: Challenge, part: Part): Results {
 
   try {
     partStartTime = process.uptime();
+    if (part === 1 && challenge.init !== undefined) challenge.init();
     if (challenge.reset !== undefined) challenge.reset();
-    const [ message, answer ] = challenge[`solvePart${part}`]() ?? [ null, null ];
+    const [message, answer] = challenge[`solvePart${part}`]() ?? [ null, null ];
     partEndTime = process.uptime();
 
     results.message = message;

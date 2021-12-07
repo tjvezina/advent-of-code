@@ -1,8 +1,8 @@
-export default {
+export const challenge = {
   title: 'Dive!',
 
-  initInput(inputText) {
-    this.input = inputText.split(/\r?\n/);
+  init() {
+    this.instructions = this.input.split(/\r?\n/);
   },
 
   // --- Part 1 --- //
@@ -10,7 +10,7 @@ export default {
   solvePart1() {
     let pos = { x: 0, y: 0 };
 
-    for (const step of this.input) {
+    for (const step of this.instructions) {
       const [ dir, dist ] = step.split(' ');
 
       switch (dir) {
@@ -31,7 +31,7 @@ export default {
     let pos = { x: 0, y: 0 };
     let aim = 0;
 
-    for (const step of this.input) {
+    for (const step of this.instructions) {
       const [ dir, distStr ] = step.split(' ');
       const dist = Number(distStr);
 

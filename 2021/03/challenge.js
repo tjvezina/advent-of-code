@@ -1,24 +1,26 @@
-export default {
+export const challenge = {
   title: 'Binary Diagnostic',
 
-  initInput(inputText) {
-    this.input = inputText.split(/\r?\n/);
+  init() {
+    this.binaryList = this.input.split(/\r?\n/);
   },
 
   // --- Part 1 --- //
   part1ExpectedAnswer: 3148794,
   solvePart1() {
-    let bitCounts = new Array(this.input[0].length).fill(0);
+    const { binaryList } = this;
 
-    for (const number of this.input) {
-      for (let i = 0; i < number.length; i++) {
-        if (number[i] === '1') {
+    let bitCounts = new Array(binaryList[0].length).fill(0);
+
+    for (const binary of binaryList) {
+      for (let i = 0; i < binary.length; i++) {
+        if (binary[i] === '1') {
           bitCounts[i]++;
         }
       }
     }
 
-    const gammaRateStr = bitCounts.map(count => count > this.input.length / 2 ? '1' : '0').join('');
+    const gammaRateStr = bitCounts.map(count => count > this.binaryList.length / 2 ? '1' : '0').join('');
     const epsilonRateStr = [...gammaRateStr].map(bit => bit === '1' ? '0' : '1').join('');
 
     const gammaRate = parseInt(gammaRateStr, 2);
@@ -44,10 +46,12 @@ export default {
       return compareFunc(zeros, ones) ? zeros : ones;
     }
 
-    let oxyGenRatingCandidates = [...this.input];
-    let co2RatingCandidates = [...this.input];
+    const { binaryList } = this;
 
-    for (let i = 0; i < this.input[0].length; i++) {
+    let oxyGenRatingCandidates = [...binaryList];
+    let co2RatingCandidates = [...binaryList];
+
+    for (let i = 0; i < binaryList[0].length; i++) {
       oxyGenRatingCandidates = reduceValues(oxyGenRatingCandidates, i, (zeros, ones) => zeros.length > ones.length);
       co2RatingCandidates = reduceValues(co2RatingCandidates, i, (zeros, ones) => zeros.length <= ones.length);
     }

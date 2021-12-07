@@ -3,11 +3,11 @@ import { Challenge } from './challenge.js';
 import { log, ConsoleColor } from './framework/console-util.js';
 
 const enum ResultStatus {
-  development, // No answer given; hasn't been started, or isn't complete yet
-  candidate,   // Answer given, expected answer unknown; to be submitted to AoC
-  wrongAnswer, // Given answer does not match expected
-  success,     // Given answer matches expected
-  exception,   // Unhandled exception during execution
+  Development, // No answer given; hasn't been started, or isn't complete yet
+  Candidate,   // Answer given, expected answer unknown; to be submitted to AoC
+  WrongAnswer, // Given answer does not match expected
+  Success,     // Given answer matches expected
+  Exception,   // Unhandled exception during execution
 }
 
 interface Results {
@@ -99,15 +99,15 @@ function testPart(challenge: Challenge, part: Part) {
 
   setStatusColor(results.status);
   switch (results.status) {
-    case ResultStatus.development:
-    case ResultStatus.candidate:
+    case ResultStatus.Development:
+    case ResultStatus.Candidate:
       log.write('WIP ');
       break;
-    case ResultStatus.wrongAnswer:
-    case ResultStatus.exception:
+    case ResultStatus.WrongAnswer:
+    case ResultStatus.Exception:
       log.write('FAIL');
       break;
-    case ResultStatus.success:
+    case ResultStatus.Success:
       log.write('PASS');
       break;
   }
@@ -117,7 +117,7 @@ function testPart(challenge: Challenge, part: Part) {
   writeBenchmark();
 
   log.resetColors();
-  log.writeLine(results.status === ResultStatus.exception ? results.message : results.givenAnswer ?? '');
+  log.writeLine(results.status === ResultStatus.Exception ? results.message : results.givenAnswer ?? '');
 }
 
 function execute(challenge: Challenge, part: Part): Results {
@@ -134,14 +134,14 @@ function execute(challenge: Challenge, part: Part): Results {
 
     const expected = challenge[`part${part}ExpectedAnswer`];
     if (expected !== null) {
-      results.status = (results.givenAnswer === expected ? ResultStatus.success : ResultStatus.wrongAnswer);
+      results.status = (results.givenAnswer === expected ? ResultStatus.Success : ResultStatus.WrongAnswer);
     } else if (results.givenAnswer !== null) {
-      results.status = ResultStatus.candidate;
+      results.status = ResultStatus.Candidate;
     } else {
-      results.status = ResultStatus.development;
+      results.status = ResultStatus.Development;
     }
   } catch (err) {
-    results.status = ResultStatus.exception;
+    results.status = ResultStatus.Exception;
     partStartTime = partEndTime = null;
 
     results.message = `${err}`;
@@ -172,11 +172,11 @@ function writeBenchmark() {
 
 function setStatusColor(status: ResultStatus) {
   switch (status) {
-    case ResultStatus.development:   log.setForeground(ConsoleColor.DarkGray);                 break;
-    case ResultStatus.candidate:     log.setForeground(ConsoleColor.Cyan);                     break;
-    case ResultStatus.wrongAnswer:   log.setForeground(ConsoleColor.Red);                      break;
-    case ResultStatus.success:       log.setForeground(ConsoleColor.Green);                    break;
-    case ResultStatus.exception:     log.setColors(ConsoleColor.Black, ConsoleColor.Red);      break;
+    case ResultStatus.Development:   log.setForeground(ConsoleColor.DarkGray);                 break;
+    case ResultStatus.Candidate:     log.setForeground(ConsoleColor.Cyan);                     break;
+    case ResultStatus.WrongAnswer:   log.setForeground(ConsoleColor.Red);                      break;
+    case ResultStatus.Success:       log.setForeground(ConsoleColor.Green);                    break;
+    case ResultStatus.Exception:     log.setColors(ConsoleColor.Black, ConsoleColor.Red);      break;
     default:
       throw new Error(`Unknown result status: ${status}`);
   }

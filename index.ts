@@ -8,7 +8,7 @@ interface ChallengeDate {
 }
 
 // Set to a specific year while working on challenges from that year, or null for the current year
-const ACTIVE_YEAR = null;
+const ACTIVE_YEAR: number | null = null;
 const FIRST_YEAR = 2015;
 
 const arg0 = process.argv[2];

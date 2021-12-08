@@ -145,6 +145,7 @@ function execute(challenge: Challenge, part: Part): Results {
     results.message = `${err}`;
   }
 
+  log.resetColors();
   return results;
 }
 

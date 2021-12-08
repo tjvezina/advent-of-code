@@ -1,8 +1,8 @@
 export const challenge = {
   title: '',
 
-  initInput(inputText) {
-    this.input = inputText;
+  init() {
+    const lines = this.input.split(/\r?\n/);
   },
 
   // --- Part 1 --- //

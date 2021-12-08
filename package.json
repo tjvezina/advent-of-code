@@ -5,7 +5,8 @@
   "description": "",
   "scripts": {
     "start": "node --no-warnings --loader ts-node/esm ./index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --no-warnings --loader ts-node/esm ./index.ts test",
+    "create": "node --no-warnings --loader ts-node/esm ./index.ts create"
   },
   "repository": {
     "type": "git",

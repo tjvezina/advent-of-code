@@ -15,6 +15,8 @@ Several commands take a date, in one of these formats: `YYYY`, `DD`, `YYYY/DD`
 | --- | --- |
 | `npm start` | Executes the most recent existing challenge in the active year |
 | `npm start -- <date>` | Executes a specific challenge, or the most recent in the given year |
-| `npm start -- create [<year>]` | Creates the folders/files for the next challange in the active/given year |
-| `npm start -- test [<date>]` | Tests the answer and performance of the given or most recent challenge |
-| `npm start -- test all` | Tests all challenges in all years |
+| `npm test` | Tests the answer and performance of the most recent existing challenge |
+| `npm test -- <date>` | Tests a specific challenge, or all challenges in the given year |
+| `npm test -- all` | Tests all challenges in all years |
+| `npm run create` | Creates the folders/files for the next challange in the active year |
+| `npm run create -- <year>` | Creates the folders/files for the next challange in the given year |

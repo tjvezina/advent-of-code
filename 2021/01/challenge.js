@@ -36,5 +36,5 @@ export const challenge = {
     }
 
     return ['The depth windows increase {0} times', increases];
-  }
+  },
 }

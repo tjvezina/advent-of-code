@@ -48,5 +48,5 @@ export const challenge = {
     }
 
     return [`${pos.x} forward x ${pos.y} down = `, pos.x * pos.y];
-  }
+  },
 }

@@ -86,5 +86,5 @@ export const challenge = {
     }
 
     return ventMap;
-  }
+  },
 }

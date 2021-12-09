@@ -15,5 +15,5 @@ export const challenge = {
   part2ExpectedAnswer: null,
   solvePart2() {
     return [null, null];
-  }
+  },
 }

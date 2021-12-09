@@ -67,5 +67,5 @@ export const challenge = {
       `Oxygen generator rating ${oxygenGeneratorRating} x CO2 scrubber rating ${co2ScrubberRating} = `,
       oxygenGeneratorRating * co2ScrubberRating
     ];
-  }
+  },
 }

@@ -1,32 +1,4 @@
-class Point {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-  }
-
-  toString() {
-    return `${this.x},${this.y}`;
-  }
-
-  equals(other) {
-    return Object.getPrototypeOf(other) === Point.prototype && this.x === other.x && this.y === other.y;
-  }
-
-  clone() {
-    return new Point(this.x, this.y);
-  }
-}
-
-class Line {
-  constructor(x1, y1, x2, y2) {
-    this.start = new Point(x1, y1);
-    this.end = new Point(x2, y2);
-  }
-
-  isAxisAligned() {
-    return this.start.x === this.end.x || this.start.y === this.end.y;
-  }
-}
+import { Line } from '../../framework/geometry.js';
 
 export const challenge = {
   title: 'Hydrothermal Venture',

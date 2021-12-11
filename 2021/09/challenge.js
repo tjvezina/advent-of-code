@@ -35,19 +35,21 @@ export const challenge = {
     const basins = this.lowPoints.map(this.getBasin.bind(this)).sort((a, b) => a.length - b.length);
 
     // Draw the basin map with random colors
-    for (let y = 0; y < MAP_SIZE; y++) {
-      for (let x = 0; x < MAP_SIZE; x++) {
-        const height = this.heightMap[y][x];
-        const gray = height/9*255;
-        log.setBackground(Color.fromRGB(gray, gray, gray));
+    if (!this.isTestMode) {
+      for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
+          const height = this.heightMap[y][x];
+          const gray = height/9*255;
+          log.setBackground(Color.fromRGB(gray, gray, gray));
 
-        const iBasin = basins.findIndex(b => b.some(p => p.equals({ x, y })));
-        log.setForeground(Color.fromRGB((iBasin*576.3186) % 255, (iBasin*267.6129) % 255, (iBasin*863.1748) % 255));
+          const iBasin = basins.findIndex(b => b.some(p => p.equals({ x, y })));
+          log.setForeground(Color.fromRGB((iBasin*576.3186) % 255, (iBasin*267.6129) % 255, (iBasin*863.1748) % 255));
 
-        log.write(iBasin === -1 ? '  ' : '<>');
+          log.write(iBasin === -1 ? '  ' : '<>');
+        }
+        log.resetBackground();
+        log.writeLine();
       }
-      log.resetBackground();
-      log.writeLine();
     }
 
     return ['The product of the area of the 3 largest basins is ', basins.slice(-3).reduce((a, b) => a * b.length, 1)];

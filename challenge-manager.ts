@@ -82,6 +82,7 @@ async function runPart(challenge: Challenge, part: Part) {
 
 export async function testChallenge(year: number, day: number): Promise<void> {
   const challenge = await loadChallenge(year, day);
+  challenge.isTestMode = true;
 
   await testPart(challenge, 1);
   await testPart(challenge, 2);

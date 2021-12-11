@@ -3,6 +3,7 @@ export interface Challenge {
   year: number,
   day: number,
   input: string,
+  isTestMode: boolean,
 
   // Called once before part 1
   init?: () => void,

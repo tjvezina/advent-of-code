@@ -1,27 +1,21 @@
-// Values correspond to ANSI excape codes, where background colors = foreground + 10
-export enum ConsoleColor {
-  Black = 30,
-  DarkRed = 31,
-  DarkGreen = 32,
-  DarkYellow = 33,
-  DarkBlue = 34,
-  DarkMagenta = 35,
-  DarkCyan = 36,
-  Gray = 37,
-  DarkGray = 90,
-  Red = 91,
-  Green = 92,
-  Yellow = 93,
-  Blue = 94,
-  Magenta = 95,
-  Cyan = 96,
-  White = 97,
+import { Color } from './color.js';
+
+type FontOptions = {
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 };
 
-const foregroundStack: ConsoleColor[] = [];
-const backgroundStack: ConsoleColor[] = [];
+type ColorArg = Color | string;
 
 const defaultWriteFunc = process.stdout.write;
+
+function parseColorArg(arg: ColorArg): Color {
+  if (Object.getPrototypeOf(arg) === Color.prototype) {
+    return arg as Color;
+  }
+  return Color.fromHex(arg as string);
+}
 
 export const log = {
   write(msg?: any) { process.stdout.write(msg === undefined ? '' : `${msg}`); },
@@ -30,101 +24,26 @@ export const log = {
   // @ts-ignore: Allow assigning an empty function to disable stdout
   disableStdout() { process.stdout.write = function () {}; },
   enableStdout() { process.stdout.write = defaultWriteFunc; },
-  
-  setForeground(color: ConsoleColor) { process.stdout.write(`\u001b[${color}m`); },
-  setBackground(color: ConsoleColor) { process.stdout.write(`\u001b[${color + 10}m`); },
-  
-  setColors(fg: ConsoleColor, bg: ConsoleColor) { process.stdout.write(`\u001b[${fg};${bg + 10}m`); },
-  
-  resetColors() { process.stdout.write('\u001b[0m'); },
-  
-  pushForeground(color: ConsoleColor) {
-    foregroundStack.push(color);
-    this.setForeground(color);
+
+  setForeground(arg: ColorArg, options?: FontOptions): void {
+    const color = parseColorArg(arg);
+    const optionsStr = (options?.bold ? ';1' : ';22') + (options?.italic ? ';3' : ';23') + (options?.underline ? ';4' : ';24');
+    process.stdout.write(`\u001b[38;2;${color.r};${color.g};${color.b}${optionsStr}m`);
   },
-  
-  popForeground() {
-    foregroundStack.pop();
-    const lastForeground = foregroundStack.slice(-1)[0];
-  
-    if (lastForeground !== undefined) {
-      this.setForeground(lastForeground);
-    } else {
-      this.resetColors();
-      if (backgroundStack.length > 0) {
-        this.setBackground(backgroundStack.slice(-1)[0]);
-      }
-    }
+
+  resetForeground(): void { process.stdout.write('\u001b[39;22;23;24m'); },
+
+  setBackground(arg: ColorArg): void {
+    const color = parseColorArg(arg);
+    process.stdout.write(`\u001b[48;2;${color.r};${color.g};${color.b}m`);
   },
-  
-  pushBackground(color: ConsoleColor) {
-    backgroundStack.push(color);
-    this.setBackground(color);
+
+  resetBackground(): void { process.stdout.write('\u001b[49m'); },
+
+  setColors(fg: ColorArg, bg: ColorArg, options?: FontOptions): void {
+    this.setForeground(fg, options);
+    this.setBackground(bg);
   },
-  
-  popBackground() {
-    backgroundStack.pop();
-    const lastBackground = backgroundStack.slice(-1)[0];
-  
-    if (lastBackground !== undefined) {
-      this.setBackground(lastBackground);
-    } else {
-      this.resetColors();
-      if (foregroundStack.length > 0) {
-        this.setForeground(foregroundStack.slice(-1)[0]);
-      }
-    }
-  },
+
+  resetColors(): void { process.stdout.write('\u001b[0m'); },
 };
-
-// export function write(msg?: string) { process.stdout.write(msg ?? ''); }
-// export function writeLine(msg?: string) { process.stdout.write((msg ?? '') + '\n'); }
-
-// // @ts-ignore: Allow assigning an empty function to disable stdout
-// export function disableStdout() { process.stdout.write = function () {}; }
-// export function enableStdout() { process.stdout.write = defaultWriteFunc; }
-
-// export function setForeground(color: Color) { process.stdout.write(`\u001b[${color}m`); }
-// export function setBackground(color: Color) { process.stdout.write(`\u001b[${color + 10}m`); }
-
-// export function setColors(fg: Color, bg: Color) { process.stdout.write(`\u001b[${fg};${bg + 10}m`); }
-
-// export function resetColors() { process.stdout.write('\u001b[0m'); }
-
-// export function pushForeground(color: Color) {
-//   foregroundStack.push(color);
-//   setForeground(color);
-// }
-
-// export function popForeground() {
-//   foregroundStack.pop();
-//   const lastForeground = foregroundStack.slice(-1)[0];
-
-//   if (lastForeground !== undefined) {
-//     setForeground(lastForeground);
-//   } else {
-//     resetColors();
-//     if (backgroundStack.length > 0) {
-//       setBackground(backgroundStack.slice(-1)[0]);
-//     }
-//   }
-// }
-
-// export function pushBackground(color: Color) {
-//   backgroundStack.push(color);
-//   setBackground(color);
-// }
-
-// export function popBackground() {
-//   backgroundStack.pop();
-//   const lastBackground = backgroundStack.slice(-1)[0];
-
-//   if (lastBackground !== undefined) {
-//     setBackground(lastBackground);
-//   } else {
-//     resetColors();
-//     if (foregroundStack.length > 0) {
-//       setForeground(foregroundStack.slice(-1)[0]);
-//     }
-//   }
-// }

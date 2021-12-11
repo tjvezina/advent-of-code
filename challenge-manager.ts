@@ -1,6 +1,7 @@
 import { existsSync, promises } from 'fs';
 import { Challenge } from './challenge.js';
-import { log, ConsoleColor } from './framework/console-util.js';
+import { log } from './framework/console-util.js';
+import { Color } from './framework/color.js';
 
 const enum ResultStatus {
   Development, // No answer given; hasn't been started, or isn't complete yet
@@ -47,7 +48,7 @@ async function loadChallenge(year: number, day: number): Promise<Challenge> {
 export async function runChallenge(year: number, day: number): Promise<void> {
   const challenge = await loadChallenge(year, day);
 
-  log.setForeground(ConsoleColor.Yellow);
+  log.setForeground(Color.Yellow);
   log.writeLine(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
   log.resetColors();
 
@@ -70,7 +71,7 @@ function runPart(challenge: Challenge, part: Part) {
   if (messageParts.length > 0) {
     log.write(messageParts[0]);
   }
-  log.setForeground(ConsoleColor.Cyan);
+  log.setForeground(Color.Cyan, { bold: true });
   log.write(results.givenAnswer ?? '');
   log.resetColors();
   if (messageParts.length > 1) {
@@ -91,7 +92,7 @@ function testPart(challenge: Challenge, part: Part) {
   const results = execute(challenge, part);
   log.enableStdout();
 
-  log.setForeground(part === 1 ? ConsoleColor.Blue : ConsoleColor.DarkCyan);
+  log.setForeground(part === 1 ? Color.Blue : Color.DarkCyan, { bold: true });
   log.write(`${String(challenge.day).padStart(2, '0')}-${part} `);
 
   setStatusColor(results.status);
@@ -160,22 +161,22 @@ function writeBenchmark() {
   else if (elapsed < 1000) elapsedStr = elapsed.toFixed(1);
   else                     elapsedStr = '>1000';
 
-  if      (elapsed <  0.25) log.setForeground(ConsoleColor.DarkGray);
-  else if (elapsed <  1.0)  log.setForeground(ConsoleColor.DarkGreen);
-  else if (elapsed <  5.0)  log.setForeground(ConsoleColor.DarkYellow);
-  else if (elapsed < 10.0)  log.setForeground(ConsoleColor.DarkRed);
-  else                      log.setForeground(ConsoleColor.Red);
+  if      (elapsed <  0.25) log.setForeground(Color.DarkGray);
+  else if (elapsed <  1.0)  log.setForeground(Color.DarkGreen);
+  else if (elapsed <  5.0)  log.setForeground(Color.DarkYellow);
+  else if (elapsed < 10.0)  log.setForeground(Color.DarkRed);
+  else                      log.setForeground(Color.Red);
 
   log.write(`(${elapsedStr}s) `);
 }
 
 function setStatusColor(status: ResultStatus) {
   switch (status) {
-    case ResultStatus.Development:   log.setForeground(ConsoleColor.DarkGray);                 break;
-    case ResultStatus.Candidate:     log.setForeground(ConsoleColor.Cyan);                     break;
-    case ResultStatus.WrongAnswer:   log.setForeground(ConsoleColor.Red);                      break;
-    case ResultStatus.Success:       log.setForeground(ConsoleColor.Green);                    break;
-    case ResultStatus.Exception:     log.setColors(ConsoleColor.Black, ConsoleColor.Red);      break;
+    case ResultStatus.Development:   log.setForeground(Color.DarkGray);     break;
+    case ResultStatus.Candidate:     log.setForeground(Color.Cyan);         break;
+    case ResultStatus.WrongAnswer:   log.setForeground(Color.Red);          break;
+    case ResultStatus.Success:       log.setForeground(Color.Green);        break;
+    case ResultStatus.Exception:     log.setColors(Color.Black, Color.Red); break;
     default:
       throw new Error(`Unknown result status: ${status}`);
   }

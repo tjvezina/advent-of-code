@@ -1,4 +1,5 @@
-import { log, ConsoleColor } from '../../framework/console-util.js';
+import { log } from '../../framework/console-util.js';
+import { Color } from '../../framework/color.js';
 
 const BOARD_SIZE = 5;
 
@@ -103,13 +104,13 @@ export const challenge = {
     const board = this.boards[boardIndex];
 
     log.writeLine();
-    log.setForeground(ConsoleColor.DarkYellow);
+    log.setForeground(Color.DarkYellow);
     log.writeLine(` Bingo Card #${boardIndex + 1}`);
     for (let row = 0; row < BOARD_SIZE; row++) {
-      log.setBackground(ConsoleColor.Gray);
+      log.setBackground(Color.Gray);
       for (let col = 0; col < BOARD_SIZE; col++) {
         const number = board[row][col];
-        log.setForeground(calledNumbers.includes(number) ? ConsoleColor.DarkGreen : ConsoleColor.DarkGray);
+        log.setForeground(calledNumbers.includes(number) ? Color.DarkGreen : Color.DarkGray);
         log.write(String(number).padStart(3, ' '));
       }
       log.write(' ');

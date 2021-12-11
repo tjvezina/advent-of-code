@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, writeFile, promises } from 'fs';
 import { getChallengePath, runChallenge, testChallenge } from './challenge-manager.js';
-import { ConsoleColor, log } from './framework/console-util.js';
+import { log } from './framework/console-util.js';
+import { Color } from './framework/color.js';
 
 interface ChallengeDate {
   year?: number;
@@ -130,7 +131,7 @@ async function testChallenges(startYear: number, endYear?: number, singleDay?: n
       }
 
       if (!yearHeaderWasDrawn) {
-        log.setForeground(ConsoleColor.Yellow);
+        log.setForeground(Color.Yellow);
         log.writeLine(`-- ${year} --`);
         log.resetColors();
 

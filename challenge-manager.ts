@@ -52,12 +52,12 @@ export async function runChallenge(year: number, day: number): Promise<void> {
   log.writeLine(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
   log.resetColors();
 
-  runPart(challenge, 1);
-  runPart(challenge, 2);
+  await runPart(challenge, 1);
+  await runPart(challenge, 2);
 }
 
-function runPart(challenge: Challenge, part: Part) {
-  const results = execute(challenge, part);
+async function runPart(challenge: Challenge, part: Part) {
+  const results = await execute(challenge, part);
 
   setStatusColor(results.status);
   log.write(`[Part ${part}]`);
@@ -83,13 +83,13 @@ function runPart(challenge: Challenge, part: Part) {
 export async function testChallenge(year: number, day: number): Promise<void> {
   const challenge = await loadChallenge(year, day);
 
-  testPart(challenge, 1);
-  testPart(challenge, 2);
+  await testPart(challenge, 1);
+  await testPart(challenge, 2);
 }
 
-function testPart(challenge: Challenge, part: Part) {
+async function testPart(challenge: Challenge, part: Part) {
   log.disableStdout();
-  const results = execute(challenge, part);
+  const results = await execute(challenge, part);
   log.enableStdout();
 
   log.setForeground(part === 1 ? Color.Blue : Color.DarkCyan, { bold: true });
@@ -118,14 +118,14 @@ function testPart(challenge: Challenge, part: Part) {
   log.writeLine(results.status === ResultStatus.Exception ? results.message : results.givenAnswer ?? '');
 }
 
-function execute(challenge: Challenge, part: Part): Results {
+async function execute(challenge: Challenge, part: Part): Promise<Results> {
   let results = {} as Results;
 
   try {
     partStartTime = process.uptime();
     if (part === 1 && challenge.init !== undefined) challenge.init();
     if (challenge.reset !== undefined) challenge.reset();
-    const [message, answer] = challenge[`solvePart${part}`]() ?? [ null, null ];
+    const [message, answer] = await challenge[`solvePart${part}`]() ?? [ null, null ];
     partEndTime = process.uptime();
 
     results.message = message;

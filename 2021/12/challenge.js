@@ -48,7 +48,7 @@ export const challenge = {
     const closedPaths = [];
 
     while (openPaths.length > 0) {
-      const path = openPaths.shift();
+      const path = openPaths.pop();
       const lastNode = path.slice(-1)[0];
 
       for (const neighbor of lastNode.neighbors) {

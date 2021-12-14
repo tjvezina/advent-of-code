@@ -36,14 +36,12 @@ export const asciiArt = {
     if (image.length !== ART_CHAR_HEIGHT) {
       throw new Error(`Image data must be ${ART_CHAR_HEIGHT} rows`);
     }
-    if (image.some(line => line.length !== image[0].length)) {
-      throw new Error('Image rows must be equal length');
-    }
 
     let text = '';
 
     // Some letters do not use the full width available, so allow the input to be one column short
-    const letterCount = Math.floor((image[0].length + 1) / ART_CHAR_WIDTH);
+    const width = image.reduce((width, line) => Math.max(width, line.length), 0);
+    const letterCount = Math.floor((width + 1) / ART_CHAR_WIDTH);
     for (let i = 0; i < letterCount; i++) {
       const mask = getLetterMask(image, i);
       if (mask === 0) {
@@ -51,7 +49,7 @@ export const asciiArt = {
       } else {
         const letterIndex = LETTER_MASKS.indexOf(mask);
         if (letterIndex === -1) {
-          console.error(`Unrecognized ASCII art letter (index ${i})`);
+          console.error(`Unrecognized ASCII art letter (index ${i} / mask ${mask})`);
           text += '?';
         } else {
           text += String.fromCharCode('A'.charCodeAt(0) + letterIndex);
@@ -65,13 +63,12 @@ export const asciiArt = {
 
 function getLetterMask(image: boolean[][], index: number): number {
   let letterMask = 0;
-  const width = image[0].length;
   const xStart = ART_CHAR_WIDTH * index;
 
   for (let y = 0; y < image.length; y++) {
     for (let x = xStart; x < xStart + ART_CHAR_WIDTH; x++) {
       letterMask <<= 1;
-      if (x < width && image[y][x]) {
+      if (image[y][x]) {
         letterMask++;
       }
     }

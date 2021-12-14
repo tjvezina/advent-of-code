@@ -47,8 +47,8 @@ export const log = {
 
   resetColors(): void { process.stdout.write('\u001b[0m'); },
 
-  moveUp(count: number): void { process.stdout.write(`\u001b[${count}A`); },
-  moveDown(count: number): void { process.stdout.write(`\u001b[${count}B`); },
-  moveRight(count: number): void { process.stdout.write(`\u001b[${count}C`); },
-  moveLeft(count: number): void { process.stdout.write(`\u001b[${count}D`); },
+  moveUp(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}A` : ''); },
+  moveDown(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}B` : ''); },
+  moveRight(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}C` : ''); },
+  moveLeft(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}D` : ''); },
 };

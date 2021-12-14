@@ -5,6 +5,7 @@ import { Color } from './framework/color.js';
 
 const enum ResultStatus {
   Development, // No answer given; hasn't been started, or isn't complete yet
+  Example,     // Example input used
   Candidate,   // Answer given, expected answer unknown; to be submitted to AoC
   WrongAnswer, // Given answer does not match expected
   Success,     // Given answer matches expected
@@ -24,7 +25,7 @@ let partEndTime: number | null = null;
 
 export function getChallengePath(year: number, day: number): string { return `./${year}/${String(day).padStart(2, '0')}`; }
 
-async function loadChallenge(year: number, day: number): Promise<Challenge> {
+async function loadChallenge(year: number, day: number, exampleInput = false): Promise<Challenge> {
   const path = getChallengePath(year, day);
 
   const challengePath = `${path}/challenge.js`;
@@ -33,9 +34,9 @@ async function loadChallenge(year: number, day: number): Promise<Challenge> {
     process.exit(1);
   }
 
-  const inputPath = `${path}/input.txt`;
+  const inputPath = (exampleInput ? `${path}/input_example.txt` : `${path}/input.txt`);
   if (!existsSync(inputPath)) {
-    console.error(`Input file for challenge ${year}/${String(day).padStart(2, '0')} does not exist.`);
+    console.error(`${exampleInput ? 'Example input' : 'Input'} file for challenge ${year}/${String(day).padStart(2, '0')} does not exist.`);
     process.exit(1);
   }
 
@@ -45,19 +46,19 @@ async function loadChallenge(year: number, day: number): Promise<Challenge> {
   return { year, day, input, ...challenge };
 }
 
-export async function runChallenge(year: number, day: number): Promise<void> {
-  const challenge = await loadChallenge(year, day);
+export async function runChallenge(year: number, day: number, exampleInput = false): Promise<void> {
+  const challenge = await loadChallenge(year, day, exampleInput);
 
   log.setForeground(Color.Yellow);
   log.writeLine(` <<< ${year} Day ${day}: ${challenge.title} >>> `);
   log.resetColors();
 
-  await runPart(challenge, 1);
-  await runPart(challenge, 2);
+  await runPart(challenge, 1, exampleInput);
+  await runPart(challenge, 2, exampleInput);
 }
 
-async function runPart(challenge: Challenge, part: Part) {
-  const results = await execute(challenge, part);
+async function runPart(challenge: Challenge, part: Part, exampleInput: boolean) {
+  const results = await execute(challenge, part, exampleInput);
 
   setStatusColor(results.status);
   log.write(`[Part ${part}]`);
@@ -119,7 +120,7 @@ async function testPart(challenge: Challenge, part: Part) {
   log.writeLine(results.status === ResultStatus.Exception ? results.message : results.givenAnswer ?? '');
 }
 
-async function execute(challenge: Challenge, part: Part): Promise<Results> {
+async function execute(challenge: Challenge, part: Part, exampleInput = false): Promise<Results> {
   let results = {} as Results;
 
   try {
@@ -132,13 +133,17 @@ async function execute(challenge: Challenge, part: Part): Promise<Results> {
     results.message = message;
     results.givenAnswer = answer;
 
-    const expected = challenge[`part${part}ExpectedAnswer`];
-    if (expected !== null) {
-      results.status = (results.givenAnswer === expected ? ResultStatus.Success : ResultStatus.WrongAnswer);
-    } else if (results.givenAnswer !== null) {
-      results.status = ResultStatus.Candidate;
+    if (exampleInput) {
+      results.status = ResultStatus.Example;
     } else {
-      results.status = ResultStatus.Development;
+      const expected = challenge[`part${part}ExpectedAnswer`];
+      if (expected !== null) {
+        results.status = (results.givenAnswer === expected ? ResultStatus.Success : ResultStatus.WrongAnswer);
+      } else if (results.givenAnswer !== null) {
+        results.status = ResultStatus.Candidate;
+      } else {
+        results.status = ResultStatus.Development;
+      }
     }
   } catch (err) {
     results.status = ResultStatus.Exception;
@@ -173,11 +178,12 @@ function writeBenchmark() {
 
 function setStatusColor(status: ResultStatus) {
   switch (status) {
-    case ResultStatus.Development:   log.setForeground(Color.DarkGray);     break;
-    case ResultStatus.Candidate:     log.setForeground(Color.Cyan);         break;
-    case ResultStatus.WrongAnswer:   log.setForeground(Color.Red);          break;
-    case ResultStatus.Success:       log.setForeground(Color.Green);        break;
-    case ResultStatus.Exception:     log.setColors(Color.Black, Color.Red); break;
+    case ResultStatus.Development:  log.setForeground(Color.DarkGray);      break;
+    case ResultStatus.Example:      log.setForeground(Color.Magenta);       break;
+    case ResultStatus.Candidate:    log.setForeground(Color.Cyan);          break;
+    case ResultStatus.WrongAnswer:  log.setForeground(Color.Red);           break;
+    case ResultStatus.Success:      log.setForeground(Color.Green);         break;
+    case ResultStatus.Exception:    log.setColors(Color.Black, Color.Red);  break;
     default:
       throw new Error(`Unknown result status: ${status}`);
   }

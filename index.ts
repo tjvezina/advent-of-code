@@ -46,18 +46,30 @@ switch (arg0) {
     }
     break;
   default:
-    const arg0Date = parseDateArg(arg0);
+    if (arg0 === 'example') {
+      const arg1Date = parseDateArg(arg1);
 
-    if (arg0 === undefined || arg0Date !== null) {
-      const year = arg0Date?.year ?? getDefaultYear();
-      const day = arg0Date?.day ?? getMostRecentChallengeDay(year);
+      const year = arg1Date?.year ?? getDefaultYear();
+      const day = arg1Date?.day ?? getMostRecentChallengeDay(year);
       if (day === null) {
         console.error(`No ${year} challenges found.`);
       } else {
-        runChallenge(year, day);
+        runChallenge(year, day, true);
       }
     } else {
-      console.error('Unknown command:', arg0);
+      const arg0Date = parseDateArg(arg0);
+
+      if (arg0 === undefined || arg0Date !== null) {
+        const year = arg0Date?.year ?? getDefaultYear();
+        const day = arg0Date?.day ?? getMostRecentChallengeDay(year);
+        if (day === null) {
+          console.error(`No ${year} challenges found.`);
+        } else {
+          runChallenge(year, day);
+        }
+      } else {
+        console.error('Unknown command:', arg0);
+      }
     }
     break;
 }

@@ -51,4 +51,17 @@ export const log = {
   moveDown(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}B` : ''); },
   moveRight(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}C` : ''); },
   moveLeft(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}D` : ''); },
+
+  async waitForKey(): Promise<void> {
+    process.stdin.resume();
+    process.stdin.setRawMode(true);
+    return new Promise(resolve => process.stdin.once('data', (buffer: any) => {
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      if (`${buffer}`.charCodeAt(0) === 3) {
+        process.exit();
+      }
+      resolve();
+    }))
+  },
 };

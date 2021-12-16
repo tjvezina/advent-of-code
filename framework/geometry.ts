@@ -1,4 +1,8 @@
 export class Point {
+  static getTaxiDist(a: Point, b: Point) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
+
   x: number;
   y: number;
 

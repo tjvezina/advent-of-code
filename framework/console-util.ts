@@ -18,6 +18,14 @@ function parseColorArg(arg: ColorArg): Color {
 }
 
 export const log = {
+  get width(): number {
+    return process.stdout.columns;
+  },
+
+  get height(): number {
+    return process.stdout.rows;
+  },
+
   write(msg?: any) { process.stdout.write(msg === undefined ? '' : `${msg}`); },
   writeLine(msg?: any) { process.stdout.write((msg === undefined ? '' : `${msg}`) + '\n'); },
   
@@ -47,10 +55,14 @@ export const log = {
 
   resetColors(): void { process.stdout.write('\u001b[0m'); },
 
-  moveUp(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}A` : ''); },
-  moveDown(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}B` : ''); },
-  moveRight(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}C` : ''); },
-  moveLeft(count: number): void { process.stdout.write(count > 0 ? `\u001b[${count}D` : ''); },
+  moveCursor(x: number, y: number): void { process.stdout.moveCursor(x, y); },
+
+  clearLine(): void { process.stdout.clearLine(0); },
+  clearScreenBelow(): void { process.stdout.clearScreenDown(); },
+  clearScreen(): void {
+    process.stdout.cursorTo(0, 0);
+    this.clearScreenBelow();
+  },
 
   async waitForKey(): Promise<void> {
     process.stdin.resume();

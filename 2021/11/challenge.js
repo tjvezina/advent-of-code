@@ -32,7 +32,7 @@ export const challenge = {
     do {
       flashCount = this.simulateStep();
       if (!this.isTestMode) {
-        log.moveUp(GRID_SIZE * 2 + 1);
+        log.moveCursor(0, -(GRID_SIZE * 2 + 1));
         this.drawOctopodes();
         await new Promise(resolve => setTimeout(resolve, 40));
       }
@@ -94,7 +94,7 @@ export const challenge = {
     log.setForeground(Color.DarkCyan, { bold: true });
     log.writeLine(`                Time: ${String(this.step).padStart(2, ' ')}`);
     log.write(new Array(GRID_SIZE * 2).fill('\n').join(''));
-    log.moveUp(GRID_SIZE * 2);
+    log.moveCursor(0, -GRID_SIZE * 2);
 
     for (let y = 0; y < GRID_SIZE; y++) {
       log.setBackground(Color.Black);
@@ -113,9 +113,8 @@ export const challenge = {
       { bold: energyLevel === 0 }
     );
     log.write(energyLevel === 0 ? '(^^)' : '(••)');
-    log.moveLeft(4);
-    log.moveDown(1);
+    log.moveCursor(-4, 1);
     log.write(energyLevel === 0 ? '//\\\\' : '/||\\');
-    log.moveUp(1);
+    log.moveCursor(0, -1);
   }
 }

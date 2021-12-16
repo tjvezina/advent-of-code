@@ -58,7 +58,7 @@ export async function runChallenge(year: number, day: number, exampleInput = fal
 }
 
 async function runPart(challenge: Challenge, part: Part, exampleInput: boolean) {
-  const results = await execute(challenge, part, exampleInput);
+  const results = await execute(challenge, part, true, exampleInput);
 
   setStatusColor(results.status);
   log.write(`[Part ${part}]`);
@@ -91,7 +91,7 @@ export async function testChallenge(year: number, day: number): Promise<void> {
 
 async function testPart(challenge: Challenge, part: Part) {
   log.disableStdout();
-  const results = await execute(challenge, part);
+  const results = await execute(challenge, part, false);
   log.enableStdout();
 
   log.setForeground(part === 1 ? Color.Blue : Color.DarkCyan, { bold: true });
@@ -120,7 +120,7 @@ async function testPart(challenge: Challenge, part: Part) {
   log.writeLine(results.status === ResultStatus.Exception ? results.message : results.givenAnswer ?? '');
 }
 
-async function execute(challenge: Challenge, part: Part, exampleInput = false): Promise<Results> {
+async function execute(challenge: Challenge, part: Part, includeExceptionCallStack: boolean, exampleInput = false): Promise<Results> {
   let results = {} as Results;
 
   try {
@@ -149,7 +149,7 @@ async function execute(challenge: Challenge, part: Part, exampleInput = false): 
     results.status = ResultStatus.Exception;
     partStartTime = partEndTime = null;
 
-    results.message = `${err}`;
+    results.message = (includeExceptionCallStack && (err as Error) !== undefined ? `${(err as Error).stack}` : `${err}`);
   }
 
   log.resetColors();

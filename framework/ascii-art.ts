@@ -7,7 +7,7 @@ const ART_CHAR_HEIGHT = 6;
 
 const LETTER_MASKS: number[] = [];
 
-{
+(function init(){
   const data = readFileSync('./ascii-art-letters.txt', { encoding: 'utf8' })
     .split(/\r?\n/)
     .map(line => line.split('').map(c => c !== ' '));
@@ -15,7 +15,7 @@ const LETTER_MASKS: number[] = [];
   for (let i = 0; i < 26; i++) {
     LETTER_MASKS.push(getLetterMask(data, i));
   }
-}
+})();
 
 export const asciiArt = {
   draw(image: boolean[][], doubleWidth = true, color?: Color): void {

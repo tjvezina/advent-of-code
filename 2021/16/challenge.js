@@ -48,7 +48,7 @@ export const challenge = {
 
   readBits(length) {
     const i = this.pointer;
-    const bits = this.binary.substring(i, i + length);
+    const bits = this.binary.slice(i, i + length);
     this.pointer += length;
     return bits;
   },

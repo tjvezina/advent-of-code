@@ -18,8 +18,8 @@ Several commands take a date, in one of these formats: `YYYY`, `DD`, `YYYY/DD`
 | `yarn test`                   | Tests the answer and performance of the most recent existing challenge
 | `yarn test <date>`            | Tests a specific challenge, or all challenges in the given year
 | `yarn test all`               | Tests all challenges in all years
-| `yarn setup`                  | Creates the folders/files for the next challange in the active year
-| `yarn setup <year>`           | Creates the folders/files for the next challange in the given year
+| `yarn create-next`            | Creates the folders/files for the next challange in the active year
+| `yarn create-next <year>`     | Creates the folders/files for the next challange in the given year
 
 ## Development
 
@@ -33,7 +33,9 @@ An example input may be included in the file `input_example.txt` and tested with
 
 ### Solving
 
-After running `yarn setup`, a challenge folder is created from the template with some boilerplate filled in.
+If working on challenges from a past year, set `ACTIVE_YEAR` in `index.ts`, so all commands default to that year.
+
+After running `yarn create-next`, a challenge folder is created from the template with some boilerplate filled in.
 
 1. Copy the challenge's input into `input.txt`.
 2. Modify `init()` as necessary to handle parsing the challenge's particular input.

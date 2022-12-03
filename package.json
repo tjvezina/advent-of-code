@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node --no-warnings --loader ts-node/esm ./index.ts",
     "test": "node --no-warnings --loader ts-node/esm ./index.ts test",
-    "setup": "node --no-warnings --loader ts-node/esm ./index.ts create"
+    "create-next": "node --no-warnings --loader ts-node/esm ./index.ts create"
   },
   "repository": {
     "type": "git",

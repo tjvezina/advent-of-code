@@ -1,5 +1,5 @@
 export const challenge = {
-  title: '',
+  title: 'Rucksack Reorganization',
 
   init() {
     this.inputLines = this.input.split(/\r?\n/);

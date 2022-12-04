@@ -7,7 +7,7 @@ const DRAW = 3;
 const WIN = 6;
 
 export const challenge = {
-  title: '',
+  title: 'Rock Paper Scissors',
 
   init() {
     this.inputLines = this.input.split(/\r?\n/);

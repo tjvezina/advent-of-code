@@ -26,7 +26,7 @@ export const challenge = {
   },
 
   // --- Part 2 --- //
-  part2ExpectedAnswer: null,
+  part2ExpectedAnswer: 808,
   solvePart2() {
     const overlappingPairs = this.pairs.filter(pair => {
       const [a, b] = pair;

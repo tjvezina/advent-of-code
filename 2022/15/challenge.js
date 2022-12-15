@@ -41,20 +41,34 @@ export const challenge = {
   // --- Part 2 --- //
   part2ExpectedAnswer: 13743542639657,
   solvePart2() {
-    for (let rowOffset = 1; rowOffset <= FIRST_ROW; rowOffset++) {
-      for (const row of [FIRST_ROW - rowOffset, FIRST_ROW + rowOffset]) {
-        const invalidRanges = this.checkRow(row).sort((a, b) => a[0] - b[0]);
-        
-        if (invalidRanges.length > 1 && invalidRanges[0][1] < invalidRanges[1][0] - 1) {
-          const col = invalidRanges[0][1] + 1;
-          if (col >= 0 && col < FIRST_ROW * 2) {
-            return [`The distress beacon must be at ${col}, ${row} with frequency `, (col * (2*FIRST_ROW) + row)];
-          }
-        }
-      }
-    }
+    const diamonds = this.sensors.map(sensor => ({
+      center: sensor.pos,
+      radius: Point.getTaxiDist(sensor.pos, sensor.nearestBeacon) + 1
+    }));
 
-    throw new Error('Failed to find location of the distress beacon');
+    const tangentPairs = diamonds.map((diamond, i) => [diamond, ...diamonds.slice(i+1)
+      .filter(other => Point.getTaxiDist(diamond.center, other.center) === diamond.radius + other.radius)]
+    ).filter(pair => pair.length >= 2);
+
+    if (tangentPairs.length < 2) throw new Error('Failed to find two tangent sensor pairs, unable to solve');
+    if (tangentPairs.length > 2) throw new Error('Found too many tangent sensor pairs, not supported');
+
+    const [a, b, c, d] = tangentPairs.flatMap(x => x);
+
+    const p1 = new Point(a.center.x + Math.sign(b.center.x - a.center.x) * a.radius, a.center.y);
+    const p2 = new Point(a.center.x, a.center.y + Math.sign(b.center.y - a.center.y) * a.radius);
+    const p3 = new Point(c.center.x + Math.sign(d.center.x - c.center.x) * c.radius, c.center.y);
+    const p4 = new Point(c.center.x, c.center.y + Math.sign(d.center.y - c.center.y) * c.radius);
+
+    const denominator = (p1.x - p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x - p4.x);
+    let bx = ((p1.x*p2.y - p1.y*p2.x)*(p3.x - p4.x) - (p1.x - p2.x)*(p3.x*p4.y - p3.y*p4.x)) / denominator;
+    let by = ((p1.x*p2.y - p1.y*p2.x)*(p3.y - p4.y) - (p1.y - p2.y)*(p3.x*p4.y - p3.y*p4.x)) / denominator;
+
+    // Resolve floating point imprecision
+    bx = Math.round(bx);
+    by = Math.round(by);
+
+    return [`The distress beacon must be at (${bx}, ${by}) with frequency `, (bx * 2*FIRST_ROW) + by];
   },
 
   checkRow(row) {

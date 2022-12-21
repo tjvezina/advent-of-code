@@ -55,7 +55,7 @@ export const challenge = {
   solvePart2() {
     const maxGeodeCounts = this.blueprints.slice(0, 3).map((blueprint, i) => {
       log.write(`Simulating #${i+1}... `);
-      const maxGeodes = simulateBlueprint(blueprint, 32, true);
+      const maxGeodes = simulateBlueprint(blueprint, 32);
       log.writeLine(maxGeodes);
       return maxGeodes;
     });
@@ -64,7 +64,7 @@ export const challenge = {
   },
 }
 
-function simulateBlueprint(blueprint, startTime, shouldCache = false) {
+function simulateBlueprint(blueprint, startTime) {
   const openSet = [new State([1, 0, 0, 0], [0, 0, 0, 0], startTime)];
 
   // Track the most geodes produces by a path, and discard any that can't possibly exceed this
@@ -76,10 +76,8 @@ function simulateBlueprint(blueprint, startTime, shouldCache = false) {
 
   const maxCosts = MATERIALS.map(material => blueprint.robots.map(robot => robot.cost[material]).reduce((a, b) => a > b ? a : b));
 
-  const stateCache = new Map();
-
   while (openSet.length > 0) {
-    const current = openSet.shift();
+    const current = openSet.pop();
 
     const minGeodes = current.materials[GEODE] + current.robots[GEODE] * current.timeLeft;
 
@@ -99,15 +97,6 @@ function simulateBlueprint(blueprint, startTime, shouldCache = false) {
 
       bestGeodeCount = Math.max(bestGeodeCount, geodeCount);
       continue;
-    }
-
-    if (shouldCache) {
-      // If another state had the same robots and materials, but fewer geodes
-      const cacheKey = [current.timeLeft, ...current.robots.slice(0, 3), ...current.materials.slice(0, 3)].join();
-      if (stateCache.get(cacheKey) ?? -1 >= minGeodes) {
-        continue;
-      }
-      stateCache.set(cacheKey, minGeodes);
     }
 
     // If there's no way to make more geodes than the current record (even with a new geode robot every minute), ignore
@@ -168,9 +157,6 @@ function simulateBlueprint(blueprint, startTime, shouldCache = false) {
       next.materials = next.materials.map((x, i) => x + (timeToBuild * next.robots[i]) - robotCost[i]);
       next.robots[robotType]++;
       next.timeLeft -= timeToBuild;
-
-      // Throw out materials in excess of possible spending, which also reduces cache keys
-      next.materials = next.materials.map((x, i) => i === GEODE ? x : Math.max(0, Math.min(x, maxCosts[i] * (next.timeLeft - MIN_USE_TIME[i]))));
 
       openSet.push(next);
     }

@@ -169,6 +169,9 @@ function simulateBlueprint(blueprint, startTime, shouldCache = false) {
       next.robots[robotType]++;
       next.timeLeft -= timeToBuild;
 
+      // Throw out materials in excess of possible spending, which also reduces cache keys
+      next.materials = next.materials.map((x, i) => i === GEODE ? x : Math.max(0, Math.min(x, maxCosts[i] * (next.timeLeft - MIN_USE_TIME[i]))));
+
       openSet.push(next);
     }
   }

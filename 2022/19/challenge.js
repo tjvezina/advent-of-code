@@ -1,9 +1,19 @@
-const NONE = -1;
+import { log } from '../../framework/console-util.js';
+
+class State {
+  constructor(robots, materials, timeLeft) {
+    Object.assign(this, { robots, materials, timeLeft });
+  }
+
+  clone() {
+    return new State([...this.robots], [...this.materials], this.timeLeft);
+  }
+}
+
 const ORE = 0;
 const CLAY = 1;
 const OBSIDIAN = 2;
 const GEODE = 3;
-const MATERIALS = [ORE, CLAY, OBSIDIAN, GEODE];
 
 export const challenge = {
   title: 'Not Enough Minerals',
@@ -24,11 +34,11 @@ export const challenge = {
   // --- Part 1 --- //
   part1ExpectedAnswer: 1306,
   solvePart1() {
-    // console.log(simulateBlueprint(this.blueprints[0 % this.blueprints.length]));
-
     const maxGeodeCounts = this.blueprints.map((blueprint, i) => {
-      console.log(`Simulating #${i+1}...`);
-      return simulateBlueprint(blueprint, 24);
+      log.write(`Simulating #${i+1}... `);
+      const maxGeodes = simulateBlueprint(blueprint, 24);
+      log.writeLine(maxGeodes);
+      return maxGeodes;
     });
 
     const qualityLevels = maxGeodeCounts.map((count, i) => (i + 1) * count);
@@ -40,84 +50,100 @@ export const challenge = {
   part2ExpectedAnswer: 37604,
   solvePart2() {
     const maxGeodeCounts = this.blueprints.slice(0, 3).map((blueprint, i) => {
-      console.log(`Simulating #${i+1}...`);
-      return simulateBlueprint(blueprint, 32);
+      log.write(`Simulating #${i+1}... `);
+      const maxGeodes = simulateBlueprint(blueprint, 32);
+      log.writeLine(maxGeodes);
+      return maxGeodes;
     });
 
     return ['The product of the first 3 blueprints\' max geode counts is ', maxGeodeCounts.reduce((a, b) => a * b)];
   },
 }
 
-function simulateBlueprint(blueprint, timeLimit) {
-  // Track the most successful path so far, discarding any that can't possibly exceed this
-  let minGeodes = 0;
+function simulateBlueprint(blueprint, startTime) {
+  const openSet = [new State([1, 0, 0, 0], [0, 0, 0, 0], startTime)];
 
-  const maximizeGeodes = function (robots, materials, skippedOptions, remainingMinutes, branchDepth = 0) {
-    // --- PRUNE --- //
-    if (remainingMinutes <= 1) {
-      return materials[GEODE] + robots[GEODE] * remainingMinutes;
+  // Track the most geodes produces by a path, and discard any that can't possibly exceed this
+  let bestGeodeCount = 0;
+
+  // The minimum time it can take to build the first robot, starting from the preceeding type
+  const minGeodeBuildTime = 1 + Math.ceil((Math.sqrt(8*blueprint.robots[GEODE].cost[OBSIDIAN] + 1) - 1) / 2);
+  const minObsidianBuildTime = 1 + Math.ceil((Math.sqrt(8*blueprint.robots[OBSIDIAN].cost[CLAY] + 1) - 1) / 2);
+
+  while (openSet.length > 0) {
+    const current = openSet.shift();
+
+    const minGeodes = current.materials[GEODE] + current.robots[GEODE] * current.timeLeft;
+
+    bestGeodeCount = Math.max(bestGeodeCount, minGeodes);
+
+    // No time to build more robots
+    if (current.timeLeft <= 1) {
+      continue;
     }
 
-    minGeodes = Math.max(minGeodes, materials[GEODE]);
-
-    if (minGeodes > 0) {
-      let maxGeodeRobots = remainingMinutes - 1;
-      // TODO: This could be improved to account for how long it will take to build the first robot
-      if (robots[OBSIDIAN] === 0) {
-        maxGeodeRobots -= 2;
-        if (robots[CLAY] === 0) {
-          maxGeodeRobots -= 2;
+    // If there's no way to make more geodes than the current record (even with a new geode robot every minute), ignore
+    if (bestGeodeCount > 0) {
+      let maxAdditionalGeodeRobots = current.timeLeft - 1;
+      if (current.robots[OBSIDIAN] === 0) {
+        maxAdditionalGeodeRobots -= minGeodeBuildTime;
+        if (current.robots[CLAY] === 0) {
+          maxAdditionalGeodeRobots -= minObsidianBuildTime;
         }
       }
-      maxGeodeRobots = Math.max(0, maxGeodeRobots);
-      const maxPotentialGeodes = materials[GEODE] + (robots[GEODE] * remainingMinutes) + ((maxGeodeRobots * (maxGeodeRobots+1) / 2));
+      maxAdditionalGeodeRobots = Math.max(0, maxAdditionalGeodeRobots);
+      const maxPotentialGeodes = minGeodes + ((maxAdditionalGeodeRobots * (maxAdditionalGeodeRobots+1) / 2));
 
-      if (maxPotentialGeodes <= minGeodes) {
-        return materials[GEODE];
+      if (maxPotentialGeodes <= bestGeodeCount) {
+        continue;
       }
     }
 
-    // --- BRANCH --- //
-    const buildOptions = [];
+    // With 2 or 3 minutes left, only Geode robots are worth building
+    // With 4 or 5 minutes left, only Geode robots, or the robots that contribute directly to building Geode robots, are worth building
+    const buildOptions = (current.timeLeft <= 3 ? [GEODE] : (current.timeLeft <= 5 ? [GEODE, OBSIDIAN, ORE] : [GEODE, OBSIDIAN, CLAY, ORE]));
 
-    const canBuildNow = MATERIALS.filter(material => blueprint.robots[material].cost.every((x, i) => materials[i] >= x));
-    // TODO: Prune options that there isn't enough time left to gather enough materials to build
-    const canBuildLater = MATERIALS.filter(material => {
-      const cost = blueprint.robots[material].cost;
-      return cost.some((x, i) => materials[i] < x) && cost.every((x, i) => x === 0 || robots[i] > 0);
-    });
+    for (const robotType of buildOptions) {
+      const robotCost = blueprint.robots[robotType].cost;
 
-    if (canBuildNow.length === 0) {
-      buildOptions.push(NONE);
-    } else {
-      buildOptions.push(...canBuildNow.filter(option => !skippedOptions.includes(option)));
-
-      if (canBuildLater.length > 0) {
-        buildOptions.push(NONE);
-      }
-    }
-
-    if (buildOptions.length === 0) {
-      throw new Error(`No build options!`);
-    }
-
-    // --- RECURSE -- //
-
-    return buildOptions.filter(option => !skippedOptions.includes(option)).map(option => {
-      let nextRobots = [...robots];
-      let nextMaterials = materials.map((x, i) => x + robots[i]);
-      let nextSkippedOptions = [];
-
-      if (option === NONE) {
-        nextSkippedOptions = [...new Set([...skippedOptions, ...canBuildNow])];
-      } else {
-        nextRobots[option]++;
-        nextMaterials = nextMaterials.map((x, i) => x - blueprint.robots[option].cost[i]);
+      // If building is not possible with the current set of robots, ignore
+      if (robotCost.some((x, i) => x > 0 && current.robots[i] === 0)) {
+        continue;
       }
 
-      return maximizeGeodes(nextRobots, nextMaterials, nextSkippedOptions, remainingMinutes - 1, branchDepth + (buildOptions.length > 1 ? 1 : 0));
-    }).reduce((a, b) => Math.max(a, b));
-  };
+      if (robotType !== GEODE) {
+        // Materials are only useful up to a certain point (ex. building obsidian robots from clay is useless with < 3 minutes left)
+        const usefulTime = (current.timeLeft - [1, 3, 1][robotType]);
 
-  return maximizeGeodes([1, 0, 0, 0], [0, 0, 0, 0], [], timeLimit);
+        const minMaterial = current.materials[robotType] + current.robots[robotType] * usefulTime;
+        
+        const maxNeeded = blueprint.robots.map(robot => robot.cost[robotType]).reduce((a, b) => a > b ? a : b) * usefulTime;
+        
+        // If we already have more of a material than we could possibly build with, don't build more of that robot
+        if (minMaterial >= maxNeeded) {
+          continue;
+        }
+      }
+
+      // Determine how long we have to wait before we have enough materials to build with
+      const timeToBuild = 1 + robotCost.map((x, i) => Math.ceil(Math.max(0, x - current.materials[i]) / (current.robots[i] || 1)))
+        .reduce((a, b) => a > b ? a : b);
+
+      // If there's not enough time to build (and use) the robot, ignore
+      if (timeToBuild > current.timeLeft - [3, 5, 3, 1][robotType]) {
+        continue;
+      }
+
+      const next = current.clone();
+
+      // Wait until we have enough materials to build, then subtract the build cost
+      next.materials = next.materials.map((x, i) => x + (timeToBuild * next.robots[i]) - robotCost[i]);
+      next.robots[robotType]++;
+      next.timeLeft -= timeToBuild;
+
+      openSet.push(next);
+    }
+  }
+
+  return bestGeodeCount;
 }

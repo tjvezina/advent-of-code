@@ -14,6 +14,10 @@ const ORE = 0;
 const CLAY = 1;
 const OBSIDIAN = 2;
 const GEODE = 3;
+const MATERIALS = [ORE, CLAY, OBSIDIAN, GEODE];
+
+const MIN_USE_TIME = [1, 3, 1, 0]; // Minimum time required to make use of a material
+const MIN_BUILD_TIME = [3, 5, 3, 1]; // Minimum time required to build a useful robot
 
 export const challenge = {
   title: 'Not Enough Minerals',
@@ -70,6 +74,8 @@ function simulateBlueprint(blueprint, startTime) {
   const minGeodeBuildTime = 1 + Math.ceil((Math.sqrt(8*blueprint.robots[GEODE].cost[OBSIDIAN] + 1) - 1) / 2);
   const minObsidianBuildTime = 1 + Math.ceil((Math.sqrt(8*blueprint.robots[OBSIDIAN].cost[CLAY] + 1) - 1) / 2);
 
+  const maxCosts = MATERIALS.map(material => blueprint.robots.map(robot => robot.cost[material]).reduce((a, b) => a > b ? a : b));
+
   while (openSet.length > 0) {
     const current = openSet.shift();
 
@@ -113,11 +119,11 @@ function simulateBlueprint(blueprint, startTime) {
 
       if (robotType !== GEODE) {
         // Materials are only useful up to a certain point (ex. building obsidian robots from clay is useless with < 3 minutes left)
-        const usefulTime = (current.timeLeft - [1, 3, 1][robotType]);
+        const usefulTime = (current.timeLeft - MIN_USE_TIME[robotType]);
 
         const minMaterial = current.materials[robotType] + current.robots[robotType] * usefulTime;
         
-        const maxNeeded = blueprint.robots.map(robot => robot.cost[robotType]).reduce((a, b) => a > b ? a : b) * usefulTime;
+        const maxNeeded = maxCosts[robotType] * usefulTime;
         
         // If we already have more of a material than we could possibly build with, don't build more of that robot
         if (minMaterial >= maxNeeded) {
@@ -130,7 +136,7 @@ function simulateBlueprint(blueprint, startTime) {
         .reduce((a, b) => a > b ? a : b);
 
       // If there's not enough time to build (and use) the robot, ignore
-      if (timeToBuild > current.timeLeft - [3, 5, 3, 1][robotType]) {
+      if (timeToBuild > current.timeLeft - MIN_BUILD_TIME[robotType]) {
         continue;
       }
 

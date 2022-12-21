@@ -55,7 +55,7 @@ export const challenge = {
   solvePart2() {
     const maxGeodeCounts = this.blueprints.slice(0, 3).map((blueprint, i) => {
       log.write(`Simulating #${i+1}... `);
-      const maxGeodes = simulateBlueprint(blueprint, 32);
+      const maxGeodes = simulateBlueprint(blueprint, 32, true);
       log.writeLine(maxGeodes);
       return maxGeodes;
     });
@@ -64,7 +64,7 @@ export const challenge = {
   },
 }
 
-function simulateBlueprint(blueprint, startTime) {
+function simulateBlueprint(blueprint, startTime, shouldCache = false) {
   const openSet = [new State([1, 0, 0, 0], [0, 0, 0, 0], startTime)];
 
   // Track the most geodes produces by a path, and discard any that can't possibly exceed this
@@ -76,6 +76,8 @@ function simulateBlueprint(blueprint, startTime) {
 
   const maxCosts = MATERIALS.map(material => blueprint.robots.map(robot => robot.cost[material]).reduce((a, b) => a > b ? a : b));
 
+  const stateCache = new Map();
+
   while (openSet.length > 0) {
     const current = openSet.shift();
 
@@ -86,6 +88,15 @@ function simulateBlueprint(blueprint, startTime) {
     // No time to build more robots
     if (current.timeLeft <= 1) {
       continue;
+    }
+
+    if (shouldCache) {
+      // If another state had the same robots and materials, but fewer geodes
+      const cacheKey = [current.timeLeft, ...current.robots.slice(0, 3), ...current.materials.slice(0, 3)].join();
+      if (stateCache.get(cacheKey) ?? -1 >= minGeodes) {
+        continue;
+      }
+      stateCache.set(cacheKey, minGeodes);
     }
 
     // If there's no way to make more geodes than the current record (even with a new geode robot every minute), ignore

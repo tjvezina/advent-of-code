@@ -90,6 +90,17 @@ function simulateBlueprint(blueprint, startTime, shouldCache = false) {
       continue;
     }
 
+    // If there are enough materials to simply build geode robots every minute until the last, ignore other paths
+    if (blueprint.robots[GEODE].cost.every((x, i) => {
+      return x === 0 || (current.materials[i] >= x && current.materials[i] + current.robots[i] * (current.timeLeft - 2) >= x * (current.timeLeft - 1));
+    })) {
+      const additionalGeodeRobots = current.timeLeft - 1;
+      const geodeCount = minGeodes + ((additionalGeodeRobots * (additionalGeodeRobots + 1) / 2));
+
+      bestGeodeCount = Math.max(bestGeodeCount, geodeCount);
+      continue;
+    }
+
     if (shouldCache) {
       // If another state had the same robots and materials, but fewer geodes
       const cacheKey = [current.timeLeft, ...current.robots.slice(0, 3), ...current.materials.slice(0, 3)].join();
@@ -109,7 +120,7 @@ function simulateBlueprint(blueprint, startTime, shouldCache = false) {
         }
       }
       maxAdditionalGeodeRobots = Math.max(0, maxAdditionalGeodeRobots);
-      const maxPotentialGeodes = minGeodes + ((maxAdditionalGeodeRobots * (maxAdditionalGeodeRobots+1) / 2));
+      const maxPotentialGeodes = minGeodes + ((maxAdditionalGeodeRobots * (maxAdditionalGeodeRobots + 1) / 2));
 
       if (maxPotentialGeodes <= bestGeodeCount) {
         continue;

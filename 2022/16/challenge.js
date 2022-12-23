@@ -1,5 +1,8 @@
 import { pathfinder } from '../../framework/pathfinder.js';
 
+const START_TIME_PART_1 = 30;
+const START_TIME_PART_2 = 26;
+
 class Valve {
   constructor(data) {
     const [, name, rate, neighborList] = data.match(/Valve (..) has flow rate=(\d+); tunnels? leads? to valves? (.*)/);
@@ -10,6 +13,35 @@ class Valve {
   }
 
   toString() { return this.name; }
+}
+
+class State {
+  constructor({ currentValve, timeLeft, closedValves, releasedPressure, withElephant }) {
+    this.currentValve = currentValve;
+    this.timeLeft = timeLeft;
+    this.closedValves = closedValves;
+    this.releasedPressure = releasedPressure;
+    this.withElephant = withElephant;
+  }
+
+  buildKey() {
+    return [
+      this.currentValve.name,
+      this.timeLeft,
+      this.closedValves.map(valve => valve.name),
+      this.withElephant,
+    ].join();
+  }
+
+  calculateMaxReleasedPressure() {
+    const sortedValveRates = this.closedValves.map(valve => valve.rate).sort((a, b) => b - a);
+
+    if (!this.withElephant) {
+      return this.releasedPressure + sortedValveRates.map((rate, i) => rate * Math.max(0, this.timeLeft - (2 * (i+1)))).reduce((a, b) => a + b);
+    }
+
+    return this.releasedPressure + sortedValveRates.reduce((a, b) => a + b) * (START_TIME_PART_2 - 2);
+  }
 }
 
 export const challenge = {
@@ -51,27 +83,7 @@ export const challenge = {
       }
     }
 
-    // Floyd–Warshall Algorithm - barely improved performance, leaving out for now
-    // const valveNames = this.valves.map(valve => valve.name);
-    // this.distMap = new Map(valveNames.map(sourceName => [
-    //   sourceName,
-    //   new Map(valveNames.map(targetName => [
-    //     targetName,
-    //     sourceName === targetName ? 0 : (this.valveMap[sourceName].neighborNames.includes(targetName) ? 1 : Number.MAX_SAFE_INTEGER)
-    //   ]))
-    // ]));
-    // valveNames.forEach(name1 => {
-    //   valveNames.forEach(name2 => {
-    //     valveNames.forEach(name3 => {
-    //       this.distMap.get(name2).set(name3, Math.min(
-    //         this.distMap.get(name2).get(name3),
-    //         this.distMap.get(name2).get(name1) + this.distMap.get(name1).get(name3),
-    //       ));
-    //     });
-    //   });
-    // });
-
-    const mostReleasedPressure = this.findBestPath(30);
+    const mostReleasedPressure = this.findBestPath(START_TIME_PART_1);
 
     return ['The most pressure that can be released in 30 minutes is ', mostReleasedPressure];
   },
@@ -79,50 +91,75 @@ export const challenge = {
   // --- Part 2 --- //
   part2ExpectedAnswer: 2556,
   solvePart2() {
-    const mostReleasedPressure = this.findBestPath(26, true);
+    const mostReleasedPressure = this.findBestPath(START_TIME_PART_2, true);
 
     return ['The most pressure that can be released in 26 minutes with help is ', mostReleasedPressure];
   },
 
-  findBestPath(startMinutes, withElephant = false) {
-    const memoizedDFS = memoize((currentValve, remainingMinutes, closedValves, withElephant = false) => {
-      let mostReleasedPressure = 0;
+  findBestPath(startTime, withElephant = false) {
+    const openSet = [new State({
+      currentValve: this.startValve,
+      timeLeft: startTime,
+      closedValves: [...this.activeValves].sort((a, b) => a.rate - b.rate),
+      releasedPressure: 0,
+      withElephant,
+    })];
 
-      for (const nextValve of closedValves) {
-        const dist = this.distMap[currentValve.name][nextValve.name];
-        
-        if (dist + 1 >= remainingMinutes) {
+    const minReleasedPressureMap = new Map([[openSet[0].key, 0]]);
+
+    let mostReleasedPressure = 0;
+
+    while (openSet.length > 0) {
+      const current = openSet.pop();
+
+      const currentKey = current.buildKey();
+      const minReleasedPressure = minReleasedPressureMap.get(currentKey) ?? 0;
+
+      // If we've reached the same state before with more pressure released, prune branch
+      if (minReleasedPressure > current.releasedPressure) {
+        continue;
+      }
+
+      minReleasedPressureMap.set(currentKey, current.releasedPressure);
+
+      // If it's impossible to release more pressure than the current record, prune branch
+      if (current.calculateMaxReleasedPressure() <= mostReleasedPressure) {
+        continue;
+      }
+
+      mostReleasedPressure = Math.max(mostReleasedPressure, current.releasedPressure);
+
+      for (const nextValve of current.closedValves) {
+        const dist = this.distMap[current.currentValve.name][nextValve.name];
+
+        // Not enough time to reach and open the valve
+        if (dist + 1 >= current.timeLeft) {
           continue;
         }
-        
-        let nextRemainingMinutes = remainingMinutes - (dist + 1);
-        const releasedPressure = (nextValve.rate * nextRemainingMinutes)
-          + memoizedDFS(nextValve, nextRemainingMinutes, closedValves.filter(valve => valve !== nextValve), withElephant);
 
-        mostReleasedPressure = Math.max(mostReleasedPressure, releasedPressure);
+        const nextTimeLeft = current.timeLeft - (dist + 1);
+
+        openSet.push(new State({
+          currentValve: nextValve,
+          timeLeft: nextTimeLeft,
+          closedValves: current.closedValves.filter(valve => valve !== nextValve),
+          releasedPressure: current.releasedPressure + (nextValve.rate * nextTimeLeft),
+          withElephant: current.withElephant,
+        }));
       }
 
-      if (withElephant) {
-        mostReleasedPressure = Math.max(mostReleasedPressure, memoizedDFS(this.startValve, startMinutes, closedValves));
+      // If the elephant is helping, we could stop and let it open the remaining valves
+      if (current.withElephant) {
+        openSet.push(new State({
+          currentValve: this.startValve,
+          timeLeft: startTime,
+          closedValves: current.closedValves,
+          releasedPressure: current.releasedPressure,
+          withElephant: false,
+        }));
       }
-
-      return mostReleasedPressure;
-    });
-
-    return memoizedDFS(this.startValve, startMinutes, [...this.activeValves], withElephant);
-  },
-}
-
-function memoize(func) {
-  const cache = new Map();
-
-  return (...args) => {
-    const key = args.join();
-
-    if (!cache.has(key)) {
-      cache.set(key, func(...args));
     }
 
-    return cache.get(key);
-  };
+    return mostReleasedPressure;
+  },
 }

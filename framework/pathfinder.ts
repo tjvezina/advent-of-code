@@ -1,4 +1,5 @@
-import { Point } from './geometry.js';
+import { Point } from '@framework/geometry';
+import Heap from '@framework/heap';
 
 type GetDFunc<T> = (a: T, b: T) => number;
 type GetHFunc<T> = (p: T, end: T) => number;
@@ -45,17 +46,18 @@ export const pathfinder = {
     getD: GetDFunc<T>,
     getH: GetHFunc<T>,
   ): T[] | null {
-    const openSet = [start];
-    const parentMap = new Map<T, T>();
-
     const gMap = new Map<T, number>([[start, 0]]);
     const fMap = new Map<T, number>([[start, getH(start, end)]]);
 
     const getG = (node: T): number => gMap.get(node) ?? Number.MAX_VALUE;
     const getF = (node: T): number => fMap.get(node) ?? Number.MAX_VALUE;
 
-    while (openSet.length > 0) {
-      const current = openSet.sort((a, b) => getF(b) - getF(a)).pop()!;
+    const openSet = Heap.createMinHeap(getF);
+    openSet.insert(start);
+    const parentMap = new Map<T, T>();
+
+    while (openSet.size > 0) {
+      const current = openSet.extract()!;
 
       if (current === end) {
         const path = [];
@@ -81,7 +83,7 @@ export const pathfinder = {
           fMap.set(neighbor, gNext + getH(neighbor, end));
           parentMap.set(neighbor, current);
           if (!openSet.includes(neighbor)) {
-            openSet.push(neighbor);
+            openSet.insert(neighbor);
           }
         }
       }

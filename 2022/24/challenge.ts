@@ -1,5 +1,6 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
 import { Point } from '@framework/geometry';
+import Heap from '@framework/heap';
 import * as Maths from '@framework/maths';
 
 class Node {
@@ -77,7 +78,8 @@ export default class Challenge extends AbstractChallenge {
     const start = new Node(startPos, startTime);
     const end = new Node(endPos, 0);
 
-    const openSet = [start];
+    const openSet = Heap.createMinHeap(getF);
+    openSet.insert(start);
     const parentMap = new Map<Node, Node>();
 
     const gMap = new Map([[start.key, 0]]);
@@ -87,8 +89,8 @@ export default class Challenge extends AbstractChallenge {
     function getF(node: Node): number { return fMap.get(node.key) ?? Number.MAX_SAFE_INTEGER; }
     function getH(a: Node, b: Node): number { return Point.getTaxiDist(a.pos, b.pos); }
 
-    while (openSet.length > 0) {
-      const current = openSet.sort((a, b) => getF(b) - getF(a)).pop()!;
+    while (openSet.size > 0) {
+      const current = openSet.extract()!;
 
       if (current.pos.equals(end.pos)) {
         const path = [];
@@ -109,7 +111,7 @@ export default class Challenge extends AbstractChallenge {
           gMap.set(neighbor.key, gNext);
           fMap.set(neighbor.key, gNext + getH(neighbor, end));
           parentMap.set(neighbor, current);
-          openSet.push(neighbor);
+          openSet.insert(neighbor);
         }
       }
     }

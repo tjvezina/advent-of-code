@@ -2,6 +2,7 @@ import AbstractChallenge, { Answer } from '@app/abstract-challenge';
 import { Color } from '@framework/color';
 import { log } from '@framework/console-util';
 import { Point } from '@framework/geometry';
+import Heap from '@framework/heap';
 import { pathfinder } from '@framework/pathfinder';
 
 const NEIGHBOR_OFFSETS = [
@@ -89,14 +90,15 @@ export default class Challenge extends AbstractChallenge {
   }
 
   findPathMultipleEnds(start: Node, ends: Node[]): Node[] {
-    const openSet = [start];
+    const openSet = Heap.createMinHeap(getF);
+    openSet.insert(start);
     const parentMap = new Map();
 
     const gMap = new Map([[start, 0]]);
     const fMap = new Map([[start, getH(start)]]);
 
-    while (openSet.length > 0) {
-      const current = openSet.sort((a, b) => getF(b) - getF(a)).pop() as Node;
+    while (openSet.size > 0) {
+      const current = openSet.extract()!;
 
       if (current.height === 0) {
         const path = [];
@@ -122,7 +124,7 @@ export default class Challenge extends AbstractChallenge {
           fMap.set(neighbor, gNext + getH(neighbor));
           parentMap.set(neighbor, current);
           if (!openSet.includes(neighbor)) {
-            openSet.push(neighbor);
+            openSet.insert(neighbor);
           }
         }
       }

@@ -62,7 +62,7 @@ export default class Challenge extends AbstractChallenge {
 
     const start = [...min] as Coord;
     const outsideIDs = new Set(start.join());
-    const openSet: Coord[] = [start];
+    const openSet = [start];
 
     while (openSet.length > 0) {
       const coord = openSet.shift()!;

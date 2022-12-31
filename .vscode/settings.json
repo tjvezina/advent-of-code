@@ -1,0 +1,4 @@
+{
+  // Prevent VS Code from changing output colors and breaking visualizations
+  "terminal.integrated.minimumContrastRatio": 1,
+}

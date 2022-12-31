@@ -117,9 +117,10 @@ export default class Challenge extends AbstractChallenge {
     log.setForeground(Color.DarkYellow);
     log.writeLine(` Bingo Card #${boardIndex + 1}`);
     for (let row = 0; row < BOARD_SIZE; row++) {
+      log.setBackground(Color.Gray);
       for (let col = 0; col < BOARD_SIZE; col++) {
         const number = board[row][col];
-        log.setForeground(calledNumbers.includes(number) ? Color.Green : Color.DarkGray);
+        log.setForeground(calledNumbers.includes(number) ? Color.DarkGreen : Color.DarkGray, { bold: true });
         log.write(`${number}`.padStart(3, ' '));
       }
       log.write(' ');

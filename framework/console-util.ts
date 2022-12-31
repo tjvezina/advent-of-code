@@ -1,9 +1,9 @@
 import { Color } from './color.js';
 
 type FontOptions = {
-  bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
+  bold?: boolean,
+  italic?: boolean,
+  underline?: boolean,
 };
 
 type ColorArg = Color | string;
@@ -26,12 +26,15 @@ export const log = {
     return process.stdout.rows;
   },
 
-  write(msg?: any) { process.stdout.write(msg === undefined ? '' : `${msg}`); },
-  writeLine(msg?: any) { process.stdout.write((msg === undefined ? '' : `${msg}`) + '\n'); },
-  
-  // @ts-ignore: Allow assigning an empty function to disable stdout
-  disableStdout() { process.stdout.write = function () {}; },
-  enableStdout() { process.stdout.write = defaultWriteFunc; },
+  write(msg?: unknown): void { process.stdout.write(msg === undefined ? '' : `${msg}`); },
+  writeLine(msg?: unknown): void { process.stdout.write((msg === undefined ? '' : `${msg}`) + '\n'); },
+
+  // Allow assigning an empty function to disable stdout
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  disableStdout(): void { process.stdout.write = function (): void { }; },
+  enableStdout(): void { process.stdout.write = defaultWriteFunc; },
 
   setForeground(arg: ColorArg, options?: FontOptions): void {
     const color = parseColorArg(arg);
@@ -67,13 +70,13 @@ export const log = {
   async waitForKey(): Promise<void> {
     process.stdin.resume();
     process.stdin.setRawMode(true);
-    return new Promise(resolve => process.stdin.once('data', (buffer: any) => {
+    return new Promise(resolve => process.stdin.once('data', (buffer: string) => {
       process.stdin.setRawMode(false);
       process.stdin.pause();
       if (`${buffer}`.charCodeAt(0) === 3) {
         process.exit();
       }
       resolve();
-    }))
+    }));
   },
 };

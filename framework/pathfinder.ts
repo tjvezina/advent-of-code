@@ -4,8 +4,8 @@ type GetDFunc<T> = (a: T, b: T) => number;
 type GetHFunc<T> = (p: T, end: T) => number;
 type GetNeighborsFunc<T> = (p: T) => T[];
 
-function gridLength() { return 1; }
-function gridHeuristic(p: Point, end: Point) { return Point.getTaxiDist(p, end); }
+function gridLength(): number { return 1; }
+function gridHeuristic(p: Point, end: Point): number { return Point.getTaxiDist(p, end); }
 
 export const pathfinder = {
   findPathInGrid(start: Point, end: Point, getNeighbors: GetNeighborsFunc<Point>, getD?: GetDFunc<Point>): Point[] {
@@ -13,7 +13,7 @@ export const pathfinder = {
   },
 
   findPath<T>(
-    start: T, 
+    start: T,
     end: T,
     getNeighbors: GetNeighborsFunc<T>,
     getD: GetDFunc<T>,
@@ -51,18 +51,18 @@ export const pathfinder = {
     const gMap = new Map<T, number>([[start, 0]]);
     const fMap = new Map<T, number>([[start, getH(start, end)]]);
 
-    const getG = (node: T) => gMap.get(node) ?? Number.MAX_VALUE;
-    const getF = (node: T) => fMap.get(node) ?? Number.MAX_VALUE;
+    const getG = (node: T): number => gMap.get(node) ?? Number.MAX_VALUE;
+    const getF = (node: T): number => fMap.get(node) ?? Number.MAX_VALUE;
 
     while (openSet.length > 0) {
-      const current = openSet.sort((a, b) => getF(b) - getF(a)).pop() as T;
+      const current = openSet.sort((a, b) => getF(b) - getF(a)).pop()!;
 
       if (current === end) {
         const path = [];
         let node = current;
         while (parentMap.has(node)) {
           path.push(node);
-          node = parentMap.get(node) as T;
+          node = parentMap.get(node)!;
         }
         return path.reverse();
       }
@@ -70,7 +70,7 @@ export const pathfinder = {
       const neighbors = getNeighbors(current);
 
       if (parentMap.has(current)) {
-        neighbors.splice(neighbors.indexOf(parentMap.get(current) as T), 1);
+        neighbors.splice(neighbors.indexOf(parentMap.get(current)!), 1);
       }
 
       for (const neighbor of neighbors) {
@@ -89,4 +89,4 @@ export const pathfinder = {
 
     return null;
   },
-}
+};

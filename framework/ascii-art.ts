@@ -1,14 +1,14 @@
-import { readFileSync } from 'fs';
-import { log } from './console-util.js';
-import { Color } from './color.js';
+import { Color } from '@framework/color';
+import { log } from '@framework/console-util';
+import * as fs from 'fs';
 
 const ART_CHAR_WIDTH = 5;
 const ART_CHAR_HEIGHT = 6;
 
 const LETTER_MASKS: number[] = [];
 
-(function init(){
-  const data = readFileSync('./ascii-art-letters.txt', { encoding: 'utf8' })
+(function init(): void {
+  const data = fs.readFileSync('framework/ascii-art-letters.txt', { encoding: 'utf8' })
     .split(/\r?\n/)
     .map(line => line.split('').map(c => c !== ' '));
 

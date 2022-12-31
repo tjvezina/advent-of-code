@@ -1,6 +1,6 @@
 # advent-of-code
 
-Solutions to 'Advent of Code' challenges, written in JavaScript with Node.js
+Solutions to 'Advent of Code' challenges, written in TypeScript and run with Node.js
 
 ## Project Setup
 
@@ -18,14 +18,14 @@ Several commands take a date, in one of these formats: `YYYY`, `DD`, `YYYY/DD`
 | `yarn test`                   | Tests the answer and performance of the most recent existing challenge
 | `yarn test <date>`            | Tests a specific challenge, or all challenges in the given year
 | `yarn test all`               | Tests all challenges in all years
-| `yarn create-next`            | Creates the folders/files for the next challange in the active year
-| `yarn create-next <year>`     | Creates the folders/files for the next challange in the given year
+| `yarn run create`             | Creates the folders/files for the next challange in the active year
+| `yarn run create <year>`      | Creates the folders/files for the next challange in the given year
 
 ## Development
 
 ### File System
 
-Each challenge is organized by date and defined in a `<year>/<month>/challenge.js` file.
+Each challenge is organized by date and defined in a `<year>/<month>/challenge.ts` file.
 
 The challenge's input is stored in and loaded from an adjacent `input.txt` file.
 
@@ -38,7 +38,7 @@ If working on challenges from a past year, set `ACTIVE_YEAR` in `index.ts`, so a
 After running `yarn create-next`, a challenge folder is created from the template with some boilerplate filled in.
 
 1. Copy the challenge's input into `input.txt`.
-2. Modify `init()` as necessary to handle parsing the challenge's particular input.
+2. Modify `init()` as necessary to handle parsing the challenge's particular input (this function is optional).
 3. Implement `solvePart1()`, returning some flavor text and the answer (ex. `return ['The answer is', 42];`).
 4. Once the answer is confirmed, set it as the value of `part1ExpectedAnswer` to allow future testing.
 5. (Optional) Add `reset()` if there is any non-challenge logic to execute between parts 1 and 2.

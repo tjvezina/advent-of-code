@@ -6,7 +6,7 @@ function hexToRGB(hex: string): [number, number, number] {
   ];
 }
 
-function validate(value: number) {
+function validate(value: number): number {
   return Math.round(Math.max(0, Math.min(255, value)));
 }
 
@@ -20,7 +20,7 @@ export class Color {
   static DarkBlue = Color.fromHex('#0726b1');
   static DarkMagenta = Color.fromHex('#8d0d8d');
   static DarkGray = Color.fromHex('#767676');
-  static Gray = Color.fromHex('#CCCCCC')
+  static Gray = Color.fromHex('#CCCCCC');
   static Red = Color.fromHex('#d81313');
   static Yellow = Color.fromHex('#FFE700');
   static Green = Color.fromHex('#1ed314');

@@ -1,5 +1,5 @@
 export class Point {
-  static getTaxiDist(a: Point, b: Point) {
+  static getTaxiDist(a: Point, b: Point): number {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
 
@@ -15,12 +15,18 @@ export class Point {
     return `${this.x},${this.y}`;
   }
 
-  equals(other: Point) {
+  equals(other: Point): boolean {
     return this.x === other.x && this.y === other.y;
   }
 
   clone(): Point {
     return new Point(this.x, this.y);
+  }
+
+  add(p: Point): Point {
+    this.x += p.x;
+    this.y += p.y;
+    return this;
   }
 }
 
@@ -33,7 +39,7 @@ export class Line {
     this.end = new Point(x2, y2);
   }
 
-  isAxisAligned() {
+  isAxisAligned(): boolean {
     return this.start.x === this.end.x || this.start.y === this.end.y;
   }
 }

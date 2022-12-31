@@ -1,0 +1,21 @@
+import AbstractChallenge, { Answer } from '@app/abstract-challenge';
+
+export default class Challenge extends AbstractChallenge {
+  title = ;
+
+  init(): void {
+    const lines = this.input.split(/\r?\n/);
+  }
+
+  // --- Part 1 --- //
+  part1ExpectedAnswer = null;
+  solvePart1(): [string, Answer] {
+    return ['', null];
+  }
+
+  // --- Part 2 --- //
+  part2ExpectedAnswer = null;
+  solvePart2(): [string, Answer] {
+    return ['', null];
+  }
+}

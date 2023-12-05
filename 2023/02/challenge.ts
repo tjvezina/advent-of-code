@@ -22,7 +22,7 @@ export default class Challenge extends AbstractChallenge {
       return samples.map(sample => {
         const counts = { [CubeColor.Red]: 0, [CubeColor.Green]: 0, [CubeColor.Blue]: 0 };
         for (const [count, color] of sample.split(', ').map(colorStr => colorStr.split(' '))) {
-          counts[color as CubeColor] += Number(count);
+          counts[color as CubeColor] += parseInt(count);
         }
         return counts;
       });

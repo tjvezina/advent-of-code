@@ -56,7 +56,7 @@ export default class Challenge extends AbstractChallenge {
         }
 
         if (neighbors.some(neighbor => !/(\d|\.)/.test(this.schematic[neighbor.y][neighbor.x]))) {
-          partNumbers.push(Number(numberStr));
+          partNumbers.push(parseInt(numberStr));
         }
       }
     }
@@ -66,7 +66,7 @@ export default class Challenge extends AbstractChallenge {
   }
 
   // --- Part 2 --- //
-  part2ExpectedAnswer = null;
+  part2ExpectedAnswer = 75847567;
   solvePart2(): [string, Answer] {
     const gearRatios: number[] = [];
 
@@ -112,7 +112,7 @@ export default class Challenge extends AbstractChallenge {
             xEnd++;
           }
 
-          const partNumber = Number(neighborRow.slice(xStart, xEnd + 1).join(''));
+          const partNumber = parseInt(neighborRow.slice(xStart, xEnd + 1).join(''));
           partNumbers.push(partNumber);
 
           neighbors = neighbors.filter(n => n.y !== neighbor.y || n.x < xStart || n.x > xEnd);

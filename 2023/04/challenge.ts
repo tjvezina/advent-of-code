@@ -18,8 +18,8 @@ export default class Challenge extends AbstractChallenge {
     this.cards = lines.map(line => {
       const [winnersStr, numbersStr] = line.split(': ')[1].split(' | ');
       return {
-        numbers: [...numbersStr.matchAll(/\d+/g)].map(match => Number(match[0])),
-        winners: [...winnersStr.matchAll(/\d+/g)].map(match => Number(match[0])),
+        numbers: [...numbersStr.matchAll(/\d+/g)].map(match => parseInt(match[0])),
+        winners: [...winnersStr.matchAll(/\d+/g)].map(match => parseInt(match[0])),
       };
     });
   }
@@ -41,7 +41,7 @@ export default class Challenge extends AbstractChallenge {
   }
 
   // --- Part 2 --- //
-  part2ExpectedAnswer = null;
+  part2ExpectedAnswer = 12263631;
   solvePart2(): [string, Answer] {
     const cardQuantities: number[] = new Array(this.cards.length).fill(1);
 

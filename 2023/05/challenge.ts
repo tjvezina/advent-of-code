@@ -40,26 +40,67 @@ export default class Challenge extends AbstractChallenge {
   // --- Part 1 --- //
   part1ExpectedAnswer = 389056265;
   solvePart1(): [string, Answer] {
-    const locations = this.seeds.map(seed => {
-      let value = seed;
-      for (const valueType of VALUE_TYPES) {
-        for (const map of this.valueMapSets[valueType]) {
-          if (value >= map.sourceStart && value < map.sourceStart + map.rangeLength) {
-            value += (map.destStart - map.sourceStart);
-            break;
-          }
-        }
-      }
-      return value;
-    });
+    const locations = this.seeds.map(this.mapSeedToLocation.bind(this));
 
     const nearestLocation = locations.reduce((nearest, location) => Math.min(nearest, location));
     return ['The nearest planting location is at ', nearestLocation];
   }
 
   // --- Part 2 --- //
-  part2ExpectedAnswer = null;
+  part2ExpectedAnswer = 137516820;
   solvePart2(): [string, Answer] {
-    return ['', null];
+    let focusValues: number[] = [];
+
+    // Collect the boundary values of each map set, and revese-map them to get a set of seed values worth focusing on
+    for (const valueType of [...VALUE_TYPES].reverse()) {
+      const valueMapSet = this.valueMapSets[valueType];
+
+      focusValues = focusValues.map(value => {
+        for (const map of valueMapSet) {
+          if (value >= map.destStart && value < map.destStart + map.rangeLength) {
+            return value + (map.sourceStart - map.destStart);
+          }
+        }
+        return value;
+      });
+
+      const mapBoundaries = valueMapSet.flatMap(map => [map.sourceStart, map.sourceStart + map.rangeLength]);
+
+      for (const boundary of mapBoundaries) {
+        if (!focusValues.includes(boundary)) {
+          focusValues.push(boundary);
+        }
+      }
+    }
+
+    focusValues.sort();
+
+    const seedValues: number[] = [];
+
+    // For each seed range, collect the relevant focus values to greatly reduce the number of values we need to check
+    for (let i = 0; i < this.seeds.length; i += 2) {
+      const [start, rangeLength] = this.seeds.slice(i, i + 2);
+
+      seedValues.push(start);
+      seedValues.push(...focusValues.filter(value => value > start && value < start + rangeLength));
+    }
+
+    const locations = seedValues.map(this.mapSeedToLocation.bind(this));
+
+    const nearestLocation = locations.reduce((nearest, location) => Math.min(nearest, location));
+    return ['The nearest planting location is at ', nearestLocation];
+  }
+
+  mapSeedToLocation(seed: number): number {
+    let value = seed;
+    for (const valueType of VALUE_TYPES) {
+      for (const map of this.valueMapSets[valueType]) {
+        if (value >= map.sourceStart && value < map.sourceStart + map.rangeLength) {
+          value += (map.destStart - map.sourceStart);
+          break;
+        }
+      }
+    }
+    return value;
   }
 }

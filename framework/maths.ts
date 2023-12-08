@@ -11,3 +11,7 @@ export function gcd(a: number, b: number): number {
   }
   return a;
 }
+
+export function lcm(...values: number[]): number {
+  return values.reduce((a, b) => a * b / gcd(a, b));
+}

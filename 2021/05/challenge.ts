@@ -1,5 +1,6 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { Line, Point } from '@framework/geometry';
+import Line from '@framework/geometry/line';
+import Point from '@framework/geometry/point';
 
 export default class Challenge extends AbstractChallenge {
   title = 'Hydrothermal Venture';

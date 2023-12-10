@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 
 type State = {
   rockIndex: number,
@@ -20,7 +20,6 @@ type Cell = (typeof R | undefined);
 const CAVE_WIDTH = 7;
 
 /* eslint-disable comma-dangle */
-/* eslint-disable array-bracket-spacing */
 /* eslint-disable no-sparse-arrays */
 const ROCKS = [
   [

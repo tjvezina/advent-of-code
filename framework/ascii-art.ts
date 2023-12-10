@@ -17,7 +17,7 @@ const LETTER_MASKS: number[] = [];
   }
 })();
 
-export const asciiArt = {
+const ASCIIArt = {
   draw(image: boolean[][], doubleWidth = true, color?: Color): void {
     for (let y = 0; y < image.length; y++) {
       const line = image[y];
@@ -60,6 +60,7 @@ export const asciiArt = {
     return text;
   },
 };
+export default ASCIIArt;
 
 function getLetterMask(image: boolean[][], index: number): number {
   let letterMask = 0;

@@ -1,4 +1,4 @@
-import Point3, { PointVector } from './point3';
+import Point3 from '@framework/geometry/point3';
 
 /**
  * An orientation represents one of 24 arrangements in which an object's forward/up/right vectors are axis-aligned.
@@ -14,7 +14,6 @@ export type Orientation = {
   inverseTransform: (p: Point3) => Point3,
 }
 
-/* eslint-disable array-bracket-spacing */
 const EVEN_ORDER_PERMUTATIONS = [
   [0, 1, 2],
   [1, 2, 0],
@@ -40,7 +39,6 @@ const ODD_SIGN_PERMUTATIONS = [
   [ 1,  1, -1],
   [-1, -1, -1],
 ];
-/* eslint-enable */
 
 /**
  * Generates a list of all 24 possible orientations.
@@ -68,13 +66,13 @@ export function generateOrientationList(): Orientation[] {
 function createOrientation(order: number[], signs: number[]): Orientation {
   return {
     transform: (p: Point3): Point3 => {
-      return new Point3(...p.vector.map((_, i) => p.vector[order[i]] * signs[i]) as PointVector);
+      return new Point3(...p.toArray().map((_, i) => p.toArray()[order[i]] * signs[i]));
     },
     inverseTransform: (p: Point3): Point3 => {
-      return new Point3(...p.vector.map((_, i) => {
+      return new Point3(...p.toArray().map((_, i) => {
         const iInverse = order.indexOf(i);
-        return p.vector[iInverse] * signs[iInverse];
-      }) as PointVector);
+        return p.toArray()[iInverse] * signs[iInverse];
+      }));
     },
   };
 }

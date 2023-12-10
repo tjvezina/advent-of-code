@@ -1,7 +1,7 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
 import { Color } from '@framework/color';
 import { log } from '@framework/console-util';
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 
 const MAP_SIZE = 100;
 

@@ -5,7 +5,6 @@ type Cell = typeof SPACE | typeof ELF;
 const SPACE = 0;
 const ELF = 1;
 
-/* eslint-disable array-bracket-spacing */
 const NEIGHBOR_OFFSETS = [
   [ 0, -1],
   [ 0,  1],
@@ -16,7 +15,6 @@ const NEIGHBOR_OFFSETS = [
   [-1,  1],
   [ 1,  1],
 ];
-/* eslint-enable */
 
 export default class Challenge extends AbstractChallenge {
   title = 'Unstable Diffusion';

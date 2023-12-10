@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { asciiArt } from '@framework/ascii-art';
+import ASCIIArt from '@framework/ascii-art';
 
 type Instruction = {
   command: string,
@@ -63,9 +63,9 @@ export default class Challenge extends AbstractChallenge {
       image.push(row);
     }
 
-    const message = asciiArt.imageToText(image);
+    const message = ASCIIArt.imageToText(image);
 
-    asciiArt.draw(image);
+    ASCIIArt.draw(image);
 
     return ['The CRT draws the message ', message];
   }

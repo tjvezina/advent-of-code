@@ -1,16 +1,11 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { lcm } from '@framework/maths';
+import Maths from '@framework/maths';
 
 enum Move { Left, Right }
 
 type Node = {
   left: string,
   right: string,
-}
-
-type Step = {
-  node: string,
-  moveIndex: number,
 }
 
 export default class Challenge extends AbstractChallenge {
@@ -48,7 +43,7 @@ export default class Challenge extends AbstractChallenge {
      */
     const currentNodes = [...this.nodeMap.keys()].filter(key => key.endsWith('A'));
     const stepsToTargetNodes = currentNodes.map(node => this.calculatePathLength(node, (node) => node.endsWith('Z')));
-    const totalCycleSteps = lcm(...stepsToTargetNodes);
+    const totalCycleSteps = Maths.lcm(...stepsToTargetNodes);
     return ['It takes {0} steps for the ghosts to all reach Z nodes', totalCycleSteps];
   }
 

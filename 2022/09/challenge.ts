@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 
 const UP = new Point(0, -1);
 const DOWN = new Point(0, 1);

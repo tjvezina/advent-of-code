@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 import { pathfinder } from '@framework/pathfinder';
 
 type Cell = {

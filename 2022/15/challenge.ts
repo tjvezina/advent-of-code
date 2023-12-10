@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 
 const FIRST_ROW = 2_000_000;
 

@@ -1,4 +1,4 @@
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 import Heap from '@framework/heap';
 
 type GetDFunc<T> = (a: T, b: T) => number;

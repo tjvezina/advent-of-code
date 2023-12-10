@@ -1,6 +1,6 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { asciiArt } from '@framework/ascii-art';
-import { Point } from '@framework/geometry';
+import ASCIIArt from '@framework/ascii-art';
+import Point from '@framework/geometry/point';
 
 type Fold = {
   dir: string,
@@ -44,10 +44,10 @@ export default class Challenge extends AbstractChallenge {
     }
 
     if (!this.isTestMode) {
-      asciiArt.draw(image);
+      ASCIIArt.draw(image);
     }
 
-    return ['The message formed by the folded paper is ', asciiArt.imageToText(image)];
+    return ['The message formed by the folded paper is ', ASCIIArt.imageToText(image)];
   }
 
   fold({ dir, line }: Fold): void {

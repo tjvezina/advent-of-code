@@ -1,11 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-
-enum Dir {
-  Up = 0,
-  Right = 1,
-  Down = 2,
-  Left = 3,
-}
+import Direction from '@framework/geometry/direction';
 
 export default class Challenge extends AbstractChallenge {
   title = 'Treetop Tree House';
@@ -30,12 +24,12 @@ export default class Challenge extends AbstractChallenge {
     for (let x = 0; x < treeMap.length; x++) {
       let max = -1;
       for (let y = 0; y < treeMap.length; y++) {
-        heightMap[y][x][Dir.Up] = max;
+        heightMap[y][x][Direction.Up] = max;
         max = Math.max(max, treeMap[y][x]);
       }
       max = -1;
       for (let y = treeMap.length - 1; y >= 0; y--) {
-        heightMap[y][x][Dir.Down] = max;
+        heightMap[y][x][Direction.Down] = max;
         max = Math.max(max, treeMap[y][x]);
       }
     }
@@ -43,12 +37,12 @@ export default class Challenge extends AbstractChallenge {
     for (let y = 0; y < treeMap.length; y++) {
       let max = -1;
       for (let x = 0; x < treeMap.length; x++) {
-        heightMap[y][x][Dir.Left] = max;
+        heightMap[y][x][Direction.Left] = max;
         max = Math.max(max, treeMap[y][x]);
       }
       max = -1;
       for (let x = treeMap.length - 1; x >= 0; x--) {
-        heightMap[y][x][Dir.Right] = max;
+        heightMap[y][x][Direction.Right] = max;
         max = Math.max(max, treeMap[y][x]);
       }
     }

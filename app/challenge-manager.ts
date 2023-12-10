@@ -23,9 +23,17 @@ type Part = 1 | 2;
 let partStartTime: number | null = null;
 let partEndTime: number | null = null;
 
+const ChallengeManager = {
+  getMostRecentChallengeDay,
+  createNextChallenge,
+  runChallenge,
+  testChallengesInRange,
+};
+export default ChallengeManager;
+
 function getChallengePath(year: number, day: number): string { return `${year}/${`${day}`.padStart(2, '0')}`; }
 
-export function getMostRecentChallengeDay(year: number): number | null {
+function getMostRecentChallengeDay(year: number): number | null {
   let day = 25;
   while (day > 0 && !fs.existsSync(getChallengePath(year, day))) {
     day--;
@@ -33,7 +41,7 @@ export function getMostRecentChallengeDay(year: number): number | null {
   return (day === 0 ? null : day);
 }
 
-export async function createNextChallenge(year: number): Promise<void> {
+async function createNextChallenge(year: number): Promise<void> {
   let day = 1;
   while (day <= 25 && fs.existsSync(getChallengePath(year, day))) {
     day++;
@@ -77,7 +85,7 @@ async function loadChallenge(year: number, day: number, exampleInput = false): P
   return new module.default(year, day, input);
 }
 
-export async function runChallenge(year: number, day: number, exampleInput = false): Promise<void> {
+async function runChallenge(year: number, day: number, exampleInput = false): Promise<void> {
   const challenge = await loadChallenge(year, day, exampleInput);
 
   log.setForeground(Color.Yellow);
@@ -112,7 +120,7 @@ async function runPart(challenge: AbstractChallenge, part: Part, exampleInput: b
   log.writeLine();
 }
 
-export async function testChallengesInRange(startYear: number, endYear?: number, singleDay?: number): Promise<void> {
+async function testChallengesInRange(startYear: number, endYear?: number, singleDay?: number): Promise<void> {
   let wasAnyTestRun = false;
   for (let year = startYear; year <= (endYear ?? startYear); year++) {
     let yearHeaderWasDrawn = false;

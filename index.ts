@@ -1,4 +1,4 @@
-import * as ChallengeManager from '@app/challenge-manager';
+import ChallengeManager from '@app/challenge-manager';
 import { log } from '@framework/console-util';
 
 interface ChallengeDate {

@@ -2,7 +2,6 @@ import AbstractChallenge, { Answer } from '@app/abstract-challenge';
 
 type Coord = [number, number, number];
 
-/* eslint-disable array-bracket-spacing */
 const NEIGHBOR_OFFSETS = [
   [-1,  0,  0],
   [ 1,  0,  0],
@@ -11,7 +10,6 @@ const NEIGHBOR_OFFSETS = [
   [ 0,  0, -1],
   [ 0,  0,  1],
 ] as Coord[];
-/* eslint-enable */
 
 export default class Challenge extends AbstractChallenge {
   title = 'Boiling Boulders';

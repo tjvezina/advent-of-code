@@ -1,7 +1,7 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
+import Point3 from '@framework/geometry/point3';
 
 import { generateOrientationList, Orientation } from './orientation';
-import Point3, { PointVector } from './point3';
 
 type Scanner = {
   beacons: Point3[],
@@ -30,7 +30,7 @@ export default class Challenge extends AbstractChallenge {
         return;
       }
 
-      scanner.beacons.push(new Point3(...line.split(',').map(x => parseInt(x)) as PointVector));
+      scanner.beacons.push(new Point3(...line.split(',').map(x => parseInt(x))));
     });
   }
 

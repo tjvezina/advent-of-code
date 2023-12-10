@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import * as Maths from '@framework/maths';
+import Maths from '@framework/maths';
 
 export default class Challenge extends AbstractChallenge {
   title = 'Grove Positioning System';

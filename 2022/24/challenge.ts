@@ -1,7 +1,7 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { Point } from '@framework/geometry';
+import Point from '@framework/geometry/point';
 import Heap from '@framework/heap';
-import * as Maths from '@framework/maths';
+import Maths from '@framework/maths';
 
 class Node {
   pos: Point;

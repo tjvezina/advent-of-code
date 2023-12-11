@@ -10,6 +10,10 @@ enum Direction {
 export default Direction;
 
 namespace Direction {
+  export function values(): Direction[] {
+    return [Direction.Right, Direction.Down, Direction.Left, Direction.Up];
+  }
+
   export function isHorizontal(direction: Direction): boolean {
     return direction === Direction.Right || direction === Direction.Left;
   }

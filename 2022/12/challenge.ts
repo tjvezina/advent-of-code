@@ -1,16 +1,11 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
 import { Color } from '@framework/color';
 import { log } from '@framework/console-util';
+import CoordSystem from '@framework/geometry/coord-system';
+import Direction from '@framework/geometry/direction';
 import Point from '@framework/geometry/point';
 import Heap from '@framework/heap';
-import { pathfinder } from '@framework/pathfinder';
-
-const NEIGHBOR_OFFSETS = [
-  new Point(1, 0),
-  new Point(-1, 0),
-  new Point(0, 1),
-  new Point(0, -1),
-];
+import Pathfinder from '@framework/pathfinder';
 
 type Node = {
   pos: Point,
@@ -25,8 +20,10 @@ export default class Challenge extends AbstractChallenge {
   end!: Node;
 
   init(): void {
+    CoordSystem.setActive(CoordSystem.YUp);
+
     this.heightMap = this.input.split(/\r?\n/).map((line, y) => [...line].map((c, x) => {
-      const node = { pos: new Point(x, y) } as Node;
+      const node: Node = { pos: new Point(x, y), height: 0 };
 
       if (c === 'S') {
         c = 'a';
@@ -49,7 +46,7 @@ export default class Challenge extends AbstractChallenge {
     const getD = (): number => 1;
     const getH = (p: Node, end: Node): number => Point.getTaxiDist(p.pos, end.pos);
 
-    const path = pathfinder.findPath(this.start, this.end, getNeighbors, getD, getH);
+    const path = Pathfinder.findPath(this.start, this.end, getNeighbors, getD, getH);
 
     if (!this.isTestMode) {
       for (const row of this.heightMap) {
@@ -138,8 +135,8 @@ export default class Challenge extends AbstractChallenge {
   }
 
   getNeighbors(node: Node): Node[] {
-    return NEIGHBOR_OFFSETS
-      .map(offset => node.pos.clone().add(offset))
+    return Direction.values()
+      .map(offset => node.pos.clone().move(offset))
       .filter(pos => pos.x >= 0 && pos.x < this.heightMap[0].length && pos.y >= 0 && pos.y < this.heightMap.length)
       .map(pos => this.heightMap[pos.y][pos.x]);
   }

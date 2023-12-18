@@ -2,6 +2,12 @@ import CoordSystem from '@framework/geometry/coord-system';
 import Direction from '@framework/geometry/direction';
 
 export default class Point {
+  static get Zero(): Point { return new Point(0, 0); }
+  static get Left(): Point { return new Point(-1, 0); }
+  static get Right(): Point { return new Point(1, 0); }
+  static get Up(): Point { return new Point(0, CoordSystem.isYUp() ? 1 : -1); }
+  static get Down(): Point { return new Point(0, CoordSystem.isYUp() ? -1 : 1); }
+
   static getTaxiDist(a: Point, b: Point): number {
     return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
   }
@@ -44,16 +50,10 @@ export default class Point {
   rotateCCW(): Point { return (CoordSystem.isYUp() ? this.rotate90() : this.rotate270()); }
 
   toDirection(): Direction {
-    let { x, y } = this;
-
-    if (CoordSystem.isYDown()) {
-      y *= -1;
-    }
-
-    if (x ===  1 && y ===  0) return Direction.Right;
-    if (x ===  0 && y === -1) return Direction.Down;
-    if (x === -1 && y ===  0) return Direction.Left;
-    if (x ===  0 && y ===  1) return Direction.Up;
+    if (this.equals(Point.Right)) return Direction.Right;
+    if (this.equals(Point.Down))  return Direction.Down;
+    if (this.equals(Point.Left))  return Direction.Left;
+    if (this.equals(Point.Up))    return Direction.Up;
 
     throw new Error(`Failed to convert ${this} to a Direction, must be a unit vector`);
   }

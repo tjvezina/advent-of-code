@@ -70,21 +70,14 @@ namespace Direction {
   }
 
   export function toPoint(direction: Direction): Point {
-    const p = new Point(0, 0);
     switch (direction) {
-      case Direction.Right: p.x =  1; break;
-      case Direction.Down:  p.y = -1; break;
-      case Direction.Left:  p.x = -1; break;
-      case Direction.Up:    p.y =  1; break;
+      case Direction.Right: return Point.Right;
+      case Direction.Down:  return Point.Down;
+      case Direction.Left:  return Point.Left;
+      case Direction.Up:    return Point.Up;
       default:
         throw new Error(`Unknown direction "${direction}`);
     }
-
-    if (CoordSystem.isYDown()) {
-      p.y *= -1;
-    }
-
-    return p;
   }
 
   export function getX(direction: Direction): number {

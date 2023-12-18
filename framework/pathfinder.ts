@@ -8,7 +8,7 @@ type GetNeighborsFunc<T> = (p: T) => T[];
 function gridLength(): number { return 1; }
 function gridHeuristic(p: Point, end: Point): number { return Point.getTaxiDist(p, end); }
 
-export const pathfinder = {
+const Pathfinder = {
   findPathInGrid(start: Point, end: Point, getNeighbors: GetNeighborsFunc<Point>, getD?: GetDFunc<Point>): Point[] {
     return this.findPath(start, end, getNeighbors, getD ?? gridLength, gridHeuristic);
   },
@@ -92,3 +92,4 @@ export const pathfinder = {
     return null;
   },
 };
+export default Pathfinder;

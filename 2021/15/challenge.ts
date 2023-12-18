@@ -1,6 +1,6 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
 import Point from '@framework/geometry/point';
-import { pathfinder } from '@framework/pathfinder';
+import Pathfinder from '@framework/pathfinder';
 
 type Cell = {
   point: Point,
@@ -39,7 +39,7 @@ export default class Challenge extends AbstractChallenge {
     const start = grid[0][0].point;
     const end = grid[height-1][width-1].point;
 
-    const path = pathfinder.findPathInGrid(start, end, getNeighbors, getD);
+    const path = Pathfinder.findPathInGrid(start, end, getNeighbors, getD);
 
     const totalRisk = path.reduce((total, p) => total + grid[p.y][p.x].risk, 0);
 
@@ -74,7 +74,7 @@ export default class Challenge extends AbstractChallenge {
     const start = fullGrid[0][0].point;
     const end = fullGrid[fullHeight-1][fullWidth-1].point;
 
-    const path = pathfinder.findPathInGrid(start, end, getNeighbors, getD);
+    const path = Pathfinder.findPathInGrid(start, end, getNeighbors, getD);
 
     const totalRisk = path.reduce((total, p) => total + fullGrid[p.y][p.x].risk, 0);
 

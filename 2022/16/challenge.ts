@@ -1,5 +1,5 @@
 import AbstractChallenge, { Answer } from '@app/abstract-challenge';
-import { pathfinder } from '@framework/pathfinder';
+import Pathfinder from '@framework/pathfinder';
 
 const START_TIME_PART_1 = 30;
 const START_TIME_PART_2 = 26;
@@ -59,7 +59,7 @@ export default class Challenge extends AbstractChallenge {
       for (let i2 = i1; i2 < this.activeValves.length; i2++) {
         const target = this.activeValves[i2];
 
-        const dist = pathfinder.findPath(
+        const dist = Pathfinder.findPath(
           source,
           target,
           (valve: Valve): Valve[] => valve.neighborNames.map(name => this.valveMap[name]),

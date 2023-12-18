@@ -38,8 +38,10 @@ export default class Point {
     return this;
   }
 
-  move(dir: Direction): Point {
-    this.add(Direction.toPoint(dir));
+  move(dir: Direction, distance = 1): Point {
+    const offset = Direction.toPoint(dir);
+    this.x += offset.x * distance;
+    this.y += offset.y * distance;
     return this;
   }
 

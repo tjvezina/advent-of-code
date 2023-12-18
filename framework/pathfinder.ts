@@ -22,7 +22,7 @@ const Pathfinder = {
   ): T[] {
     const path = this.tryFindPath(start, end, getNeighbors, getD, getH);
     if (path === null) {
-      throw new Error(`Failed to find path from ${start} to ${end}}`);
+      throw new Error(`Failed to find path from ${start} to ${end}`);
     }
     return path;
   },
